@@ -1,1 +1,1 @@
-starter app for Flask API that runs on heroku.
+wrapper for crossrev event data api.
