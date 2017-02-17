@@ -80,8 +80,8 @@ def after_request_stuff(resp):
 def index_endpoint():
     return jsonify({
         "version": "0.1",
-        "name": "api-starter-kit",
-        "description": "Summary goes here.",
+        "name": "doi-events",
+        "description": "wrapper for crossrev event data api.",
         "documentation_url": "none yet",
         "msg": "Don't panic"
     })
