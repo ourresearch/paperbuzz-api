@@ -3,6 +3,7 @@ from flask import request
 from flask import abort
 from flask import render_template
 from flask import jsonify
+from collections import defaultdict
 
 import json
 import os
@@ -12,6 +13,7 @@ import requests
 import re
 
 from app import app
+from util import clean_doi
 
 
 
@@ -87,7 +89,48 @@ def index_endpoint():
     })
 
 
+@app.route("/<path:doi>", methods=["GET"])
+def get_doi_endpoint(doi):
+    doi = clean_doi(doi)
 
+    url = "http://query.eventdata.crossref.org/events?rows=10000&filter=from-collected-date:1990-01-01,until-collected-date:2099-01-01,obj-id:{}".format(
+        doi
+    )
+    r = requests.get(url)
+    data = r.json()
+    total_results = data["message"]["total-results"]
+    events = data["message"]["events"]
+    event_counts = defaultdict(int)
+    event_summary = defaultdict(list)
+    for event in events:
+        source = event["source_id"]
+        event_counts[source] += 1
+        try:
+            author_url = event["subj"]["author"]["url"]
+        except KeyError:
+            author_url = None
+        event_summary[source].append({
+            "url": event["subj_id"],
+            "author": author_url,
+            "timestamp": event["occurred_at"]
+        })
+
+    response = {
+        "doi": doi,
+        "total_results": total_results,
+        "event_counts": event_counts,
+        "event_summary": event_summary
+    }
+    return jsonify(response)
+
+
+
+@app.route("/event/<path:event_id>", methods=["GET"])
+def get_event_endpoint(event_id):
+    response = {
+        "event_id": event_id
+    }
+    return jsonify(response)
 
 
 if __name__ == "__main__":
