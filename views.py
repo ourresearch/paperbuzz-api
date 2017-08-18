@@ -17,6 +17,7 @@ from util import clean_doi
 
 
 
+# try it at https://doi-events.herokuapp.com/10.1371/journal.pone.0000308
 
 def json_dumper(obj):
     """
