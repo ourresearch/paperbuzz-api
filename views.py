@@ -15,9 +15,11 @@ import re
 from app import app
 from util import clean_doi
 
+from source import Doi
 
 
-# try it at https://doi-events.herokuapp.com/10.1371/journal.pone.0000308
+
+# try it at https://doi-events.herokuapp.com/doi/10.1371/journal.pone.0000308
 
 def json_dumper(obj):
     """
@@ -90,39 +92,11 @@ def index_endpoint():
     })
 
 
-@app.route("/<path:doi>", methods=["GET"])
+@app.route("/doi/<path:doi>", methods=["GET"])
 def get_doi_endpoint(doi):
-    doi = clean_doi(doi)
-
-    url = "http://query.eventdata.crossref.org/events?rows=10000&filter=from-collected-date:1990-01-01,until-collected-date:2099-01-01,obj-id:{}".format(
-        doi
-    )
-    r = requests.get(url)
-    data = r.json()
-    total_results = data["message"]["total-results"]
-    events = data["message"]["events"]
-    event_counts = defaultdict(int)
-    event_summary = defaultdict(list)
-    for event in events:
-        source = event["source_id"]
-        event_counts[source] += 1
-        try:
-            author_url = event["subj"]["author"]["url"]
-        except KeyError:
-            author_url = None
-        event_summary[source].append({
-            "url": event["subj_id"],
-            "author": author_url,
-            "timestamp": event["occurred_at"]
-        })
-
-    response = {
-        "doi": doi,
-        "total_results": total_results,
-        "event_counts": event_counts,
-        "event_summary": event_summary
-    }
-    return jsonify(response)
+    my_doi = Doi(clean_doi(doi))
+    my_doi.query()
+    return jsonify(my_doi.to_dict())
 
 
 
