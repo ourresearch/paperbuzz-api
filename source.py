@@ -30,7 +30,7 @@ class Doi(object):
     def to_dict(self):
         ret = {
             "doi": self.doi,
-            "altmetrics": [s.to_dict() for s in self.ced_sources]
+            "altmetrics_sources": [s.to_dict() for s in self.ced_sources]
         }
 
         return ret
@@ -43,16 +43,22 @@ class CedSource(object):
         self.raw_events_list = events_list
 
     def to_dict(self):
-        ret = {
-            "source_id": self.source_id,
-            "events": [],
-            "events_count": len(self.raw_events_list),
-            "events_count_by_day": []  # todo make this work.
-        }
+
+        event_objects = []
 
         for raw_event in self.raw_events_list:
-            my_event_obj = CedEvent(raw_event)
-            ret["events"].append(my_event_obj.to_dict())
+            event_objects.append(CedEvent(raw_event))
+
+        # sort events by time
+        event_objects = sorted(event_objects, key=lambda x: x.occurred_at)
+        occurred_ats = [e.occurred_at for e in event_objects]
+
+        ret = {
+            "source_id": self.source_id,
+            "events": [e.to_dict() for e in event_objects],
+            "events_count": len(event_objects),
+            "events_count_by_day": count_by_day(occurred_ats)
+        }
 
         return ret
 
@@ -61,6 +67,10 @@ class CedEvent(object):
     def __init__(self, event_dict):
         self.event_dict = event_dict
 
+
+    @property
+    def occurred_at(self):
+        return self.event_dict["occurred_at"]
 
     def to_dict(self):
         try:
@@ -91,3 +101,43 @@ def get_ced_events(doi):
         data = r.json()
         events = data["message"]["events"]
         return events
+
+
+
+def count_by_day(timestamps):
+    """
+    Make a frequency histogram based on a list of timestamps.
+
+    :param timestamps: list of ISO 8601 timestamps
+    :return: a list of dicts showing how frequently each timestamp appears
+    """
+    trimmed_timestamps = [ts.split("T")[0] for ts in timestamps]
+
+    hist_dict = defaultdict(int)
+    for ts in trimmed_timestamps:
+        hist_dict[ts] += 1
+
+    ret = []
+    for ts, count in hist_dict.iteritems():
+        ret.append({
+            "date": ts,
+            "count": count
+        })
+
+    ret = sorted(ret, key=lambda x: x["date"])
+
+    return ret
+
+
+
+
+
+
+
+
+
+
+
+
+
+
