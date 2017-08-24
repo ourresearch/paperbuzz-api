@@ -26,11 +26,20 @@ class Doi(object):
             self.ced_sources.append(my_source_obj)
 
 
+        # get oaDOI
+        self.oadoi = get_oadoi(self.doi)
+
+
+        # get Crossref metadata
+        self.crossref_metadata = get_crossref_metadata(self.doi)
+
 
     def to_dict(self):
         ret = {
             "doi": self.doi,
-            "altmetrics_sources": [s.to_dict() for s in self.ced_sources]
+            "altmetrics_sources": [s.to_dict() for s in self.ced_sources],
+            "crossref_metadata": self.crossref_metadata,
+            "oadoi": self.oadoi
         }
 
         return ret
@@ -102,6 +111,18 @@ def get_ced_events(doi):
         events = data["message"]["events"]
         return events
 
+
+def get_crossref_metadata(doi):
+    url = u"https://api.crossref.org/works/{}/transform/application/vnd.citationstyles.csl+json".format(doi)
+    r = requests.get(url)
+    data = r.json()
+    return data
+
+def get_oadoi(doi):
+    url = u"https://api.oadoi.org/v2/{}".format(doi)
+    r = requests.get(url)
+    data = r.json()
+    return data
 
 
 def count_by_day(timestamps):
