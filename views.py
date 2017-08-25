@@ -3,7 +3,6 @@ from flask import request
 from flask import abort
 from flask import render_template
 from flask import jsonify
-from collections import defaultdict
 
 import json
 import os
@@ -15,7 +14,7 @@ import re
 from app import app
 from util import clean_doi
 
-from source import Doi
+from doi import Doi
 
 
 
@@ -95,7 +94,7 @@ def index_endpoint():
 @app.route("/doi/<path:doi>", methods=["GET"])
 def get_doi_endpoint(doi):
     my_doi = Doi(clean_doi(doi))
-    my_doi.query()
+    my_doi.get()
     return jsonify(my_doi.to_dict())
 
 
