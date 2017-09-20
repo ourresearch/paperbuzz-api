@@ -13,11 +13,8 @@ import requests
 import json
 from unidecode import unidecode
 import heroku
-from lxml import etree
-from lxml import html
 from sqlalchemy import sql
 from sqlalchemy import exc
-from subprocess import call
 
 
 class NoDoiException(Exception):
