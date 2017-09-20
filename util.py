@@ -5,6 +5,7 @@ import sqlalchemy
 import logging
 import math
 import bisect
+import urlparse
 import re
 import os
 import collections
@@ -12,6 +13,11 @@ import requests
 import json
 from unidecode import unidecode
 import heroku
+from lxml import etree
+from lxml import html
+from sqlalchemy import sql
+from sqlalchemy import exc
+from subprocess import call
 
 
 class NoDoiException(Exception):
@@ -61,8 +67,15 @@ def normalize(text):
     response = unidecode(unicode(response))
     response = clean_html(response)  # has to be before remove_punctuation
     response = remove_punctuation(response)
-    for stop_word in ["a ", "an ", "the "]:
-        response = response.replace(stop_word, " ")
+    response = re.sub(ur"\b(a|an|the)\b", u"", response)
+    response = re.sub(ur"\b(and)\b", u"", response)
+    response = re.sub(u"\s+", u"", response)
+    return response
+
+def normalize_simple(text):
+    response = text.lower()
+    response = remove_punctuation(response)
+    response = re.sub(ur"\b(a|an|the)\b", u"", response)
     response = re.sub(u"\s+", u"", response)
     return response
 
@@ -151,7 +164,7 @@ def safe_commit(db):
 def is_doi_url(url):
     # test urls at https://regex101.com/r/yX5cK0/2
     p = re.compile("https?:\/\/(?:dx.)?doi.org\/(.*)")
-    matches = re.findall(p, url)
+    matches = re.findall(p, url.lower())
     if len(matches) > 0:
         return True
     return False
@@ -370,12 +383,32 @@ class HTTPMethodOverrideMiddleware(object):
         return self.app(environ, start_response)
 
 
-def get_random_dois(n):
-    url = u"http://api.crossref.org/works?filter=from-pub-date:2006-01-01&sample={}".format(n)
-    r = requests.get(url)
-    items = r.json()["message"]["items"]
-    dois = [item["DOI"] for item in items]
-    print dois
+# could also make the random request have other filters
+# see docs here: https://github.com/CrossRef/rest-api-doc/blob/master/rest_api.md#sample
+# usage:
+# dois = get_random_dois(50000, from_date="2002-01-01", only_journal_articles=True)
+# dois = get_random_dois(100000, only_journal_articles=True)
+# fh = open("data/random_dois_articles_100k.txt", "w")
+# fh.writelines(u"\n".join(dois))
+# fh.close()
+def get_random_dois(n, from_date=None, only_journal_articles=True):
+    dois = []
+    while len(dois) < n:
+        # api takes a max of 100
+        number_this_round = min(n, 100)
+        url = u"http://api.crossref.org/works?sample={}".format(number_this_round)
+        if only_journal_articles:
+            url += u"&filter=type:journal-article"
+        if from_date:
+            url += u",from-pub-date:{}".format(from_date)
+        print url
+        print "calling crossref, asking for {} dois, so far have {} of {} dois".format(
+            number_this_round, len(dois), n)
+        r = requests.get(url)
+        items = r.json()["message"]["items"]
+        dois += [item["DOI"].lower() for item in items]
+    return dois
+
 
 # from https://github.com/elastic/elasticsearch-py/issues/374
 # to work around unicode problem
@@ -402,3 +435,49 @@ def restart_dyno(app_name, dyno_name):
     process = app.processes[dyno_name]
     process.restart()
     print u"restarted {} on {}!".format(dyno_name, app_name)
+
+
+def get_tree(page):
+    page = page.replace("&nbsp;", " ")  # otherwise starts-with for lxml doesn't work
+    try:
+        tree = html.fromstring(page)
+    except etree.XMLSyntaxError as e:
+        print u"not parsing, beause XMLSyntaxError in get_tree: {}".format(e)
+        tree = None
+    return tree
+
+def get_link_target(url, base_url, strip_jsessionid=True):
+    if strip_jsessionid:
+        url = re.sub(ur";jsessionid=\w+", "", url)
+    if base_url:
+        url = urlparse.urljoin(base_url, url)
+
+    return url
+
+
+def run_sql(db, q):
+    q = q.strip()
+    if not q:
+        return
+    print "running {}".format(q)
+    start = time.time()
+    try:
+        con = db.engine.connect()
+        trans = con.begin()
+        con.execute(q)
+        trans.commit()
+    except exc.ProgrammingError as e:
+        print "error {} in run_sql, continuting".format(e)
+    finally:
+        con.close()
+    print "{} done in {} seconds".format(q, elapsed(start, 1))
+
+def get_sql_answer(db, q):
+    row = db.engine.execute(sql.text(q)).first()
+    return row[0]
+
+def get_sql_answers(db, q):
+    rows = db.engine.execute(sql.text(q)).fetchall()
+    if not rows:
+        return []
+    return [row[0] for row in rows]

@@ -18,7 +18,7 @@ from doi import Doi
 
 
 
-# try it at https://doi-events.herokuapp.com/doi/10.1371/journal.pone.0000308
+# try it at https://paperbuzz-api.herokuapp.com/doi/10.1371/journal.pone.0000308
 
 def json_dumper(obj):
     """
@@ -84,7 +84,7 @@ def after_request_stuff(resp):
 def index_endpoint():
     return jsonify({
         "version": "0.1",
-        "name": "doi-events",
+        "name": "paperbuzz-api",
         "description": "wrapper for crossrev event data api.",
         "documentation_url": "none yet",
         "msg": "Don't panic"

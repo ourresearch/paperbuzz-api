@@ -14,6 +14,8 @@ import sys
 import os
 import requests
 
+HEROKU_APP_NAME = "paperbuzz-api"
+
 # set up logging
 # see http://wiki.pylonshq.com/display/pylonscookbook/Alternative+logging+configuration
 logging.basicConfig(
@@ -21,7 +23,7 @@ logging.basicConfig(
     level=logging.DEBUG,
     format='%(name)s - %(message)s'
 )
-logger = logging.getLogger("software")
+logger = logging.getLogger("paperbuzz")
 
 libraries_to_mum = [
     "requests.packages.urllib3",
