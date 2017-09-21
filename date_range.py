@@ -19,6 +19,7 @@ from event import CedEvent
 from util import elapsed
 from util import safe_commit
 from util import clean_doi
+from util import NoDoiException
 
 
 # insert into doi_queue_paperbuzz_dates (select s as id, random() as rand, false as enqueued, null::timestamp as finished, null::timestamp as started, null::text as dyno FROM generate_series
@@ -103,10 +104,13 @@ class DateRange(db.Model):
                 has_more_responses = False
 
             for api_raw in resp_data["events"]:
-                if api_raw["source_id"]=="wikipedia" and api_raw["action"] in ["replaces", "is_version_of"]:
-                    # not storing these
+                try:
+                    doi = clean_doi(api_raw["obj_id"])
+                except NoDoiException:
+                    # no valid doi, not storing these
+                    # this removes wikipedia "replaces" and "is_version_of"
                     continue
-                doi = clean_doi(api_raw["obj_id"])
+
                 source_id = api_raw["source_id"]
                 occurred_at = api_raw["occurred_at"]
                 ced_obj = CedEvent(doi=doi, api_raw=api_raw)
@@ -133,6 +137,7 @@ class DateRange(db.Model):
         safe_commit(db)
 
         return num_so_far
+
 
     def __repr__(self):
         return u"<DateRange (starts: {})>".format(self.id)
