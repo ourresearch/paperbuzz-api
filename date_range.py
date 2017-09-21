@@ -60,13 +60,12 @@ class DateRange(db.Model):
 
         while has_more_responses:
             start_time = time()
-            if cursor:
-                url = base_url_with_cursor.format(cursor=cursor, rows=rows)
-            else:
-                url = base_url.format(
+            url = base_url.format(
                     first=self.first_day,
                     last=self.last_day,
                     rows=rows)
+            if cursor:
+                url += u"&next-cursor={cursor}".format(cursor)
             logger.info(u"calling url: {}".format(url))
 
             call_tries = 0

@@ -1,6 +1,6 @@
 import requests
 from source import make_event_source
-
+from event import CedEvent
 
 
 
@@ -71,10 +71,11 @@ class AltmetricsForDoi(object):
         10.1371/journal.pone.0000308            # many events, incl lots of wiki
         """
 
-        r = requests.get(self.ced_url)
-        data = r.json()
-
-        return data["message"]["events"]
+        print "doi", self.doi
+        event_objs = CedEvent.query.filter(CedEvent.doi==self.doi).all()
+        event_dicts = [event.api_raw for event in event_objs]
+        print "event_dicts", event_dicts
+        return event_dicts
 
 
     def to_dict(self):
