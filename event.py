@@ -32,7 +32,12 @@ class CedEvent(db.Model):
     def action(self):
         if not self.api_raw:
             return None
-        return self.api_raw["action"]
+        if "action" in self.api_raw:
+            return self.api_raw["action"]
+        if "message_action" in self.api_raw:
+            return self.api_raw["message-action"]
+        return None
+
 
     @property
     def subj_id(self):
