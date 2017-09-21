@@ -116,7 +116,8 @@ class DateRange(db.Model):
                     to_commit.append(ced_obj)
                     num_so_far += 1
                 else:
-                    logger.info(u"not committing, is dup")
+                    # logger.info(u"not committing, is dup")
+                    pass
 
                 if len(to_commit) >= 100:
                     # logger.info(u"committing")
