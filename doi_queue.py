@@ -6,8 +6,6 @@ from sqlalchemy import sql
 from sqlalchemy import exc
 from subprocess import call
 import heroku3
-import boto.ec2
-from boto.manage.cmdshell import sshclient_from_instance
 from pprint import pprint
 import datetime
 
@@ -160,219 +158,6 @@ def scale_dyno(n, job_type):
     sleep(2)
     logger.info(u"verifying: now at {} dynos".format(num_dynos(job_type)))
 
-
-def export_real(do_all=False, job_type="normal", filename=None, view=None):
-
-    logger.info(u"logging in to aws")
-    conn = boto.ec2.connect_to_region('us-west-2')
-    instance = conn.get_all_instances()[0].instances[0]
-    ssh_client = sshclient_from_instance(instance, "data/key.pem", user_name="ec2-user")
-
-    logger.info(u"log in done")
-
-
-    if filename:
-        base_filename = filename.rsplit("/")[-1]
-        base_filename = base_filename.split(".")[0]
-    else:
-        base_filename = "export_queue"
-
-    if do_all:
-        filename = base_filename + "_full.csv"
-        if not view:
-            view = "export_queue"
-        command = """psql {}?ssl=true -c "\copy (select * from {} e) to '{}' WITH (FORMAT CSV, HEADER);" """.format(
-            os.getenv("DATABASE_URL"), view, filename)
-    elif job_type:
-        filename = base_filename + "_hybrid.csv"
-        if not view:
-            view = "export_queue_with_hybrid"
-        command = """psql {}?ssl=true -c "\copy (select * from {}) to '{}' WITH (FORMAT CSV, HEADER);" """.format(
-            os.getenv("DATABASE_URL"), view, filename)
-    else:
-        filename = base_filename + ".csv"
-        if not view:
-            view = "export_full"
-        command = """psql {}?ssl=true -c "\copy (select * from {}) to '{}' WITH (FORMAT CSV, HEADER);" """.format(
-            os.getenv("DATABASE_URL"), view, filename)
-    logger.info(command)
-    status, stdout, stderr = ssh_client.run(command)
-    logger.info(u"{} {} {}".format(status, stdout, stderr))
-
-    command = """gzip -c {} > {}.gz;""".format(
-        filename, filename)
-    logger.info(command)
-    status, stdout, stderr = ssh_client.run(command)
-    logger.info(u"{} {} {}".format(status, stdout, stderr))
-
-    command = """aws s3 cp {}.gz s3://oadoi-export/{}.gz --acl public-read;""".format(
-        filename, filename)
-    logger.info(command)
-    status, stdout, stderr = ssh_client.run(command)
-    logger.info(u"{} {} {}".format(status, stdout, stderr))
-
-    # also do the non .gz one because easier
-    command = """aws s3 cp {} s3://oadoi-export/{} --acl public-read;""".format(
-        filename, filename)
-    logger.info(command)
-    status, stdout, stderr = ssh_client.run(command)
-    logger.info(u"{} {} {}".format(status, stdout, stderr))
-
-    logger.info(u"now go to *** https://console.aws.amazon.com/s3/object/oadoi-export/{}.gz?region=us-east-1&tab=overview ***".format(
-        filename))
-    logger.info(u"public link is at *** https://s3-us-west-2.amazonaws.com/oadoi-export/{}.gz ***".format(
-        filename))
-
-    conn.close()
-
-    # how to add a checksum
-    #http://www.heatware.net/linux-unix/how-to-create-md5-checksums-and-validate-a-file-in-linux/
-
-
-
-def export_crossref(do_all=False, job_type="normal", filename=None, view=None):
-
-    # ssh -i /Users/hpiwowar/Dropbox/ti/certificates/aws-data-export.pem ec2-user@ec2-13-59-23-54.us-east-2.compute.amazonaws.com
-    # aws s3 cp test.txt s3://mpr-ims-harvestor/mpr-ims-dev/harvestor_staging_bigBatch/OA/test.txt
-
-
-    logger.info(u"logging in to aws")
-    # conn = boto.ec2.connect_to_region('us-west-2')
-    # instance = conn.get_all_instances()[0].instances[0]
-    # ssh_client = sshclient_from_instance(instance, "data/key.pem", user_name="ec2-user")
-
-    # to connect to clarivate's bucket
-    conn = boto.ec2.connect_to_region('us-east-2')
-    instance = conn.get_all_instances()[0].instances[0]
-    ssh_client = sshclient_from_instance(instance, "/Users/hpiwowar/Dropbox/ti/certificates/aws-data-export.pem", user_name="ec2-user")
-
-    logger.info(u"log in done")
-
-    now_timestamp = datetime.datetime.utcnow().isoformat()[0:19]
-    filename = "all_dois_{}.csv".format(now_timestamp)
-    print "filename", filename
-
-    view = "export_main where doi in (select doi from dois_wos_stefi) limit 1000"
-
-    command = """psql {}?ssl=true -c "\copy (select * from {}) to '{}' WITH (FORMAT CSV, HEADER);" """.format(
-            os.getenv("DATABASE_URL"), view, filename)
-    logger.info(command)
-    status, stdout, stderr = ssh_client.run(command)
-    logger.info(u"{} {} {}".format(status, stdout, stderr))
-
-    command = """gzip -c {} > {}.gz;""".format(
-        filename, filename)
-    logger.info(command)
-    status, stdout, stderr = ssh_client.run(command)
-    logger.info(u"{} {} {}".format(status, stdout, stderr))
-
-    command = """date -r {}.gz;""".format(
-        filename)
-    logger.info(command)
-    status, stdout, stderr = ssh_client.run(command)
-    logger.info(u"{} {} {}".format(status, stdout, stderr))
-    gz_modified = stdout.strip()
-
-    command = """aws s3 cp {}.gz s3://oadoi-export/test/{}.gz --acl public-read --metadata "modifiedtimestamp='{}'";""".format(
-        filename, filename, gz_modified)
-    logger.info(command)
-    status, stdout, stderr = ssh_client.run(command)
-    logger.info(u"{} {} {}".format(status, stdout, stderr))
-
-    # also make a .DONE file
-    # how to calculate a checksum http://www.heatware.net/linux-unix/how-to-create-md5-checksums-and-validate-a-file-in-linux/
-    command = """md5sum {}.gz > {}.gz.DONE;""".format(
-        filename, filename)
-    logger.info(command)
-    status, stdout, stderr = ssh_client.run(command)
-    logger.info(u"{} {} {}".format(status, stdout, stderr))
-
-    command = """date -r {}.gz;""".format(
-        filename)
-    logger.info(command)
-    status, stdout, stderr = ssh_client.run(command)
-    logger.info(u"{} {} {}".format(status, stdout, stderr))
-    gz_done_modified = stdout.strip()
-
-    # copy up the .DONE file
-    command = """aws s3 cp {}.gz.DONE s3://oadoi-export/test/{}.gz.DONE --acl public-read --metadata "modifiedtimestamp='{}'";""".format(
-        filename, filename, gz_done_modified)
-    logger.info(command)
-    status, stdout, stderr = ssh_client.run(command)
-    logger.info(u"{} {} {}".format(status, stdout, stderr))
-
-    logger.info(u"now go to *** https://console.aws.amazon.com/s3/object/oadoi-export/test/{}.gz?region=us-east-1&tab=overview ***".format(
-        filename))
-    logger.info(u"public link is at *** https://s3-us-west-2.amazonaws.com/oadoi-export/test/{}.gz ***".format(
-        filename))
-
-    conn.close()
-
-
-def export(do_all=False, job_type="normal", filename=None, view=None):
-
-    logger.info(u"logging in to aws")
-    conn = boto.ec2.connect_to_region('us-west-2')
-    instance = conn.get_all_instances()[0].instances[0]
-    ssh_client = sshclient_from_instance(instance, "data/key.pem", user_name="ec2-user")
-
-    logger.info(u"log in done")
-
-    now_timestamp = datetime.datetime.utcnow().isoformat()[0:19].replace("-", "").replace(":", "")
-    filename = "all_dois_{}.csv".format(now_timestamp)
-
-    filename = "all_dois_20170812T210215.csv"
-
-    print "filename", filename
-
-    view = "export_main_for_researchers"
-
-    # command = """psql {}?ssl=true -c "\copy (select * from {}) to '{}' WITH (FORMAT CSV, HEADER);" """.format(
-    #         os.getenv("DATABASE_URL"), view, filename)
-    # logger.info(command)
-    # status, stdout, stderr = ssh_client.run(command)
-    # logger.info(u"{} {} {}".format(status, stdout, stderr))
-
-    command = """gzip -c {} > {}.gz; date;""".format(
-        filename, filename)
-    logger.info(command)
-    status, stdout, stderr = ssh_client.run(command)
-    logger.info(u"{} {} {}".format(status, stdout, stderr))
-
-    command = """aws s3 cp {}.gz s3://oadoi-export/full/{}.gz --acl public-read; date; """.format(
-        filename, filename)
-    logger.info(command)
-    status, stdout, stderr = ssh_client.run(command)
-    logger.info(u"{} {} {}".format(status, stdout, stderr))
-
-    # also do the non .gz one because easier
-    command = """aws s3 cp {} s3://oadoi-export/full/{} --acl public-read; date;""".format(
-        filename, filename)
-    logger.info(command)
-    status, stdout, stderr = ssh_client.run(command)
-    logger.info(u"{} {} {}".format(status, stdout, stderr))
-
-    # also make a .DONE file
-    # how to calculate a checksum http://www.heatware.net/linux-unix/how-to-create-md5-checksums-and-validate-a-file-in-linux/
-    command = """md5sum {}.gz > {}.gz.DONE; date;""".format(
-        filename, filename)
-    logger.info(command)
-    status, stdout, stderr = ssh_client.run(command)
-    logger.info(u"{} {} {}".format(status, stdout, stderr))
-
-    # copy up the .DONE file
-    command = """aws s3 cp {}.gz.DONE s3://oadoi-export/full/{}.gz.DONE --acl public-read; date;""".format(
-        filename, filename)
-    logger.info(command)
-    status, stdout, stderr = ssh_client.run(command)
-    logger.info(u"{} {} {}".format(status, stdout, stderr))
-
-    logger.info(u"now go to *** https://console.aws.amazon.com/s3/object/oadoi-export/full/{}.gz?region=us-east-1&tab=overview ***".format(
-        filename))
-    logger.info(u"public link is at *** https://s3-us-west-2.amazonaws.com/oadoi-export/full/{}.gz ***".format(
-        filename))
-
-    conn.close()
 
 
 
@@ -533,7 +318,7 @@ if __name__ == "__main__":
             scale_dyno(1, job_type)
         monitor_till_done(job_type)
         scale_dyno(0, job_type)
-        export(parsed_args.all, job_type, parsed_args.filename, parsed_args.view)
+        # export(parsed_args.all, job_type, parsed_args.filename, parsed_args.view)
     else:
         if parsed_args.dynos != None:  # to tell the difference from setting to 0
             scale_dyno(parsed_args.dynos, job_type)
@@ -553,8 +338,8 @@ if __name__ == "__main__":
     if parsed_args.logs:
         print_logs(job_type)
 
-    if parsed_args.export:
-        export_crossref(parsed_args.all, job_type, parsed_args.filename, parsed_args.view)
+    # if parsed_args.export:
+    #     export_crossref(parsed_args.all, job_type, parsed_args.filename, parsed_args.view)
 
     if parsed_args.kick:
         kick(job_type)
