@@ -461,23 +461,21 @@ def add_dois_to_queue_from_query(where, job_type):
 def run(parsed_args, job_type):
     start = time()
     if job_type in ("normal", "hybrid"):
-        update = update_registry.get("Crossref."+process_name(job_type))
+        update = update_registry.get("CedEvents."+process_name(job_type))
         if parsed_args.doi:
             parsed_args.id = clean_doi(parsed_args.doi)
             parsed_args.doi = None
     else:
-        # update = update_registry.get("DateRange.get_crossref_api_raw")
-        update = update_registry.get("DateRange.get_unpaywall_events")
+        update = update_registry.get("DateRange.get_events")
 
     update.run(**vars(parsed_args))
 
     logger.info(u"finished update in {} seconds".format(elapsed(start)))
 
     if job_type in ("normal", "hybrid"):
-        my_pub = Crossref.query.get(parsed_args.id)
-        resp = my_pub.response_jsonb
-        pprint(resp)
-    return resp
+        from date_range import CedEvents
+        my_event = CedEvents.query.get(parsed_args.id)
+        pprint(my_event)
 
 
 # python doi_queue.py --hybrid --filename=data/dois_juan_accuracy.csv --dynos=40 --soup
@@ -506,7 +504,6 @@ if __name__ == "__main__":
     parser.add_argument('--monitor', default=False, action='store_true', help="monitor till done, then turn off dynos")
     parser.add_argument('--soup', default=False, action='store_true', help="soup to nuts")
     parser.add_argument('--kick', default=False, action='store_true', help="put started but unfinished dois back to unstarted so they are retried")
-
 
     parsed_args = parser.parse_args()
     job_type = "normal"

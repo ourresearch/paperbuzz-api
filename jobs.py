@@ -96,7 +96,7 @@ class UpdateDbQueue():
         self.job = kwargs["job"]
         self.method = self.job
         self.cls = self.job.im_class
-        self.chunk = kwargs.get("chunk", 10)
+        self.chunk = kwargs.get("chunk", 1)
         self.shortcut_fn = kwargs.get("shortcut_fn", None)
         self.shortcut_fn_per_chunk = kwargs.get("shortcut_fn_per_chunk", None)
         self.name = "{}.{}".format(self.cls.__name__, self.method.__name__)
@@ -111,6 +111,12 @@ class UpdateDbQueue():
         chunk = kwargs.get("chunk", self.chunk)
         after = kwargs.get("after", None)
         queue_table = "doi_queue_paperbuzz"
+
+        my_dyno_name = os.getenv("DYNO", "unknown")
+        if kwargs.get("hybrid", False) or "hybrid" in my_dyno_name:
+            queue_table += "_with_hybrid"
+        elif kwargs.get("dates", False) or "dates" in my_dyno_name:
+            queue_table += "_dates"
 
         if single_obj_id:
             limit = 1
@@ -137,11 +143,6 @@ class UpdateDbQueue():
                     chunk=chunk,
                     queue_name=self.queue_name)
             else:
-                my_dyno_name = os.getenv("DYNO", "unknown")
-                if kwargs.get("hybrid", False) or "hybrid" in my_dyno_name:
-                    queue_table += "_with_hybrid"
-                elif kwargs.get("dates", False) or "dates" in my_dyno_name:
-                    queue_table += "_dates"
 
                 text_query_pattern = """WITH picked_from_queue AS (
                            SELECT *
@@ -177,7 +178,7 @@ class UpdateDbQueue():
                 # logger.info(u"finished get-new-ids query in {} seconds".format(elapsed(new_loop_start_time)))
 
             if not object_ids:
-                # logger.info(u"sleeping for 5 seconds, then going again")
+                logger.info(u"sleeping for 5 seconds, then going again")
                 sleep(5)
                 continue
 

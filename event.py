@@ -1,4 +1,22 @@
+import datetime
+import shortuuid
 
+from app import db
+from sqlalchemy.dialects.postgresql import JSONB
+
+
+class CedEvent(db.Model):
+    id = db.Column(db.Text, primary_key=True)
+    updated = db.Column(db.DateTime)
+    doi = db.Column(db.Text)
+    source_id = db.Column(db.Text)
+    collected = db.Column(db.DateTime)
+    api_raw = db.Column(JSONB)
+
+    def __init__(self, **kwargs):
+        self.id = shortuuid.uuid()[0:20]
+        self.updated = datetime.datetime.utcnow()
+        super(CedEvent, self).__init__(**kwargs)
 
 
 class Event(object):
