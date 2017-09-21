@@ -65,7 +65,7 @@ class DateRange(db.Model):
                     last=self.last_day,
                     rows=rows)
             if cursor:
-                url += u"&next-cursor={cursor}".format(cursor)
+                url += u"&next-cursor={cursor}".format(cursor=cursor)
             logger.info(u"calling url: {}".format(url))
 
             call_tries = 0
