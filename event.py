@@ -47,7 +47,7 @@ class CedEvent(db.Model):
 
     def get_uniqueness_key(self):
         key = u"{} {} {}".format(self.source_id, self.normalized_subj_id, self.action)
-        hash_key = hashlib.md5(key).hexdigest()
+        hash_key = hashlib.md5(key.encode('utf-8')).hexdigest()
         return hash_key
 
     def get_occurred_at(self):
