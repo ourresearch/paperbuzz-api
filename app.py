@@ -13,6 +13,7 @@ import logging
 import sys
 import os
 import requests
+from util import safe_commit
 
 HEROKU_APP_NAME = "paperbuzz-api"
 
@@ -93,20 +94,20 @@ app.config["COMPRESS_DEBUG"] = compress_json
 # This recipe will ensure that a new Connection will succeed even if connections in the pool
 # have gone stale, provided that the database server is actually running.
 # The expense is that of an additional execution performed per checkout
-@event.listens_for(Pool, "checkout")
-def ping_connection(dbapi_connection, connection_record, connection_proxy):
-    cursor = dbapi_connection.cursor()
-    try:
-        cursor.execute("SELECT 1")
-    except:
-        # optional - dispose the whole pool
-        # instead of invalidating one at a time
-        # connection_proxy._pool.dispose()
-
-        # raise DisconnectionError - pool will try
-        # connecting again up to three times before raising.
-        raise exc.DisconnectionError()
-    cursor.close()
+# @event.listens_for(Pool, "checkout")
+# def ping_connection(dbapi_connection, connection_record, connection_proxy):
+#     cursor = dbapi_connection.cursor()
+#     try:
+#         cursor.execute("SELECT 1")
+#     except:
+#         # optional - dispose the whole pool
+#         # instead of invalidating one at a time
+#         # connection_proxy._pool.dispose()
+#
+#         # raise DisconnectionError - pool will try
+#         # connecting again up to three times before raising.
+#         raise exc.DisconnectionError()
+#     cursor.close()
 
 
 
