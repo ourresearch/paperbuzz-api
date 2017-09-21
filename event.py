@@ -35,7 +35,7 @@ class CedEvent(db.Model):
         if "action" in self.api_raw:
             return self.api_raw["action"]
         if "message_action" in self.api_raw:
-            return self.api_raw["message-action"]
+            return self.api_raw["message_action"]
         return None
 
 
