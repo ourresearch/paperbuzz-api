@@ -111,9 +111,12 @@ class DateRange(db.Model):
                     # this removes wikipedia "replaces" and "is_version_of"
                     continue
 
-                source_id = api_raw["source_id"]
-                occurred_at = api_raw["occurred_at"]
-                ced_obj = CedEvent(doi=doi, api_raw=api_raw)
+                try:
+                    ced_obj = CedEvent(doi=doi, api_raw=api_raw)
+                except KeyError:
+                    logger.info(u"missing key for event, skipping. {}".format(api_raw))
+                    continue
+
                 if not CedEvent.query.filter(CedEvent.uniqueness_key==ced_obj.uniqueness_key).first() and \
                                 ced_obj.uniqueness_key not in [obj.uniqueness_key for obj in to_commit]:
                     db.session.merge(ced_obj)
