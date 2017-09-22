@@ -5,6 +5,81 @@ import hashlib
 from app import db
 from sqlalchemy.dialects.postgresql import JSONB
 
+class IpInsights(db.Model):
+    id = db.Column(db.Text, primary_key=True)
+    ip = db.Column(db.Text, db.ForeignKey('unpaywall_event.ip'))
+    insights = db.Column(JSONB)
+    updated = db.Column(db.DateTime)
+
+    def __init__(self, **kwargs):
+        self.id = shortuuid.uuid()[0:20]
+        self.updated = datetime.datetime.utcnow()
+        super(IpInsights, self).__init__(**kwargs)
+
+
+
+class UnpaywallEvent(db.Model):
+    id = db.Column(db.Text, primary_key=True)
+    doi = db.Column(db.Text)
+    collected = db.Column(db.DateTime)
+    updated = db.Column(db.DateTime)
+    ip = db.Column(db.Text)
+
+    insights_list = db.relationship(
+        'IpInsights',
+        lazy='subquery',
+        viewonly=True,
+        cascade="all, delete-orphan",
+        backref=db.backref("unpaywall_event", lazy="subquery"),
+        foreign_keys="IpInsights.ip"
+    )
+
+
+    def __init__(self, **kwargs):
+        self.id = shortuuid.uuid()[0:20]
+        self.updated = datetime.datetime.utcnow()
+        super(UnpaywallEvent, self).__init__(**kwargs)
+
+    @property
+    def insights(self):
+        if self.insights_list and self.insights_list[0]:
+            return self.insights_list[0].insights
+        else:
+            return None
+
+    @property
+    def country(self):
+        if not self.insights:
+            return None
+        return self.insights["country"]["name"]
+
+    @property
+    def country_iso(self):
+        if not self.insights:
+            return None
+        return self.insights["country"]["iso_code"]
+
+    @property
+    def location_type(self):
+        if not self.insights:
+            return None
+        user_type = self.insights["traits"]["user_type"]
+        if user_type == "college":
+            return "academic"
+        else:
+            return "nonacademic"
+
+    def api_dict(self):
+        return {
+            "doi": self.doi,
+            "viewed": "{}00:00".format(self.collected.isoformat()[:-5]),
+            "country": self.country,
+            "country_iso": self.country_iso,
+            "location_type": self.location_type
+        }
+    def __repr__(self):
+        return u"<UnpaywallEvent ({})>".format(self.doi, self.collected)
+
 
 class CedEvent(db.Model):
     id = db.Column(db.Text, primary_key=True)
@@ -139,4 +214,6 @@ class WikipediaPageEvent(Event):
         ret = super(WikipediaPageEvent, self).to_dict()
         ret["page_url"] = self._find_stem(self.subj_id)
         return ret
+
+
 

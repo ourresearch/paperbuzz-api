@@ -91,6 +91,8 @@ def index_endpoint():
     })
 
 
+
+
 @app.route("/doi/<path:doi>", methods=["GET"])
 def get_doi_endpoint(doi):
     my_doi = Doi(clean_doi(doi))

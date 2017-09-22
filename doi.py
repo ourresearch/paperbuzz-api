@@ -1,6 +1,7 @@
 import requests
 from source import make_event_source
 from event import CedEvent
+from event import UnpaywallEvent
 
 
 
@@ -11,18 +12,21 @@ class Doi(object):
         self.metadata = CrossrefMetadata(self.doi)
         self.open_access = OaDoi(self.doi)
         self.altmetrics = AltmetricsForDoi(self.doi)
+        self.unpaywall_views = UnpaywallViewsForDoi(self.doi)
 
     def get(self):
         self.metadata.get()
         self.open_access.get()
         self.altmetrics.get()
+        self.unpaywall_views.get()
 
     def to_dict(self):
         ret = {
             "doi": self.doi,
             "altmetrics":  self.altmetrics.to_dict(),
             "metadata": self.metadata.to_dict(),
-            "open_access": self.open_access.to_dict()
+            "open_access": self.open_access.to_dict(),
+            "unpaywall_views": self.unpaywall_views.to_dict()
         }
 
         return ret
@@ -71,10 +75,8 @@ class AltmetricsForDoi(object):
         10.1371/journal.pone.0000308            # many events, incl lots of wiki
         """
 
-        print "doi", self.doi
         event_objs = CedEvent.query.filter(CedEvent.doi==self.doi).all()
         event_dicts = [event.api_raw for event in event_objs]
-        print "event_dicts", event_dicts
         return event_dicts
 
 
@@ -87,6 +89,20 @@ class AltmetricsForDoi(object):
 
 
 
+class UnpaywallViewsForDoi(object):
+    def __init__(self, doi):
+        self.doi = doi
+
+    def get(self):
+        event_objs = UnpaywallEvent.query.filter(UnpaywallEvent.doi==self.doi).all()
+        event_dicts = [event.api_dict() for event in event_objs]
+        return event_dicts
+
+    def to_dict(self):
+        ret = {
+            "events": self.get()
+        }
+        return ret
 
 
 class OaDoi(object):
