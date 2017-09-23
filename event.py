@@ -65,17 +65,19 @@ class UnpaywallEvent(db.Model):
             return None
         user_type = self.insights["traits"]["user_type"]
         if user_type == "college":
-            return "academic"
+            return True
         else:
-            return "nonacademic"
+            return False
 
     def api_dict(self):
         return {
             "doi": self.doi,
-            "viewed": "{}00:00".format(self.collected.isoformat()[:-5]),
+            "occurred_at": "{}00:00".format(self.collected.isoformat()[:-5]),
             "country": self.country,
             "country_iso": self.country_iso,
-            "location_type": self.location_type
+            "is_college_location": self.location_type,
+            "author": None,
+            "url": None
         }
     def __repr__(self):
         return u"<UnpaywallEvent ({})>".format(self.doi, self.collected)

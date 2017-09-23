@@ -8,7 +8,8 @@ from event import WikipediaPageEvent
 def make_event_source(id):
     if id == "wikipedia":
         return WikipediaEventSource(id)
-
+    elif id == "unpaywall_event":
+        return UnpaywallEventSource(id)
     else:
         return EventSource(id)
 
@@ -78,6 +79,23 @@ class WikipediaEventSource(EventSource):
         self._update()
         return event_for_this_wiki_page
 
+
+class UnpaywallEventSource(EventSource):
+
+    def add_event(self, event):
+        event_for_this_wiki_page = self._get_base_wiki_page_for_url(ced_event["subj_id"])
+
+        # first we see if this wiki page already has an Event
+        try:
+            event_for_this_wiki_page.add_ced_event(ced_event)
+
+        # if not, we creat a new Event for this wiki page
+        except AttributeError:
+            event_for_this_wiki_page = WikipediaPageEvent(ced_event)
+            self.events.append(event_for_this_wiki_page)
+
+        self._update()
+        return event_for_this_wiki_page
 
 
 

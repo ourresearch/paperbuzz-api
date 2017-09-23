@@ -21,9 +21,13 @@ class Doi(object):
         self.unpaywall_views.get()
 
     def to_dict(self):
+        altmetrics_value = self.altmetrics.to_dict()
+        altmetrics_value["sources"] += [{
+                "source_id": "unpaywall_views",
+                "events": self.unpaywall_views.to_dict()}]
         ret = {
             "doi": self.doi,
-            "altmetrics":  self.altmetrics.to_dict(),
+            "altmetrics":  altmetrics_value,
             "metadata": self.metadata.to_dict(),
             "open_access": self.open_access.to_dict(),
             "unpaywall_views": self.unpaywall_views.to_dict()
@@ -79,6 +83,7 @@ class AltmetricsForDoi(object):
         event_dicts = [event.api_raw for event in event_objs]
         return event_dicts
 
+        return event_dicts
 
     def to_dict(self):
         ret = {
@@ -99,9 +104,7 @@ class UnpaywallViewsForDoi(object):
         return event_dicts
 
     def to_dict(self):
-        ret = {
-            "events": self.get()
-        }
+        ret = self.get()
         return ret
 
 
