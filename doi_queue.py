@@ -246,7 +246,7 @@ def add_dois_to_queue_from_query(where, job_type):
 def run(parsed_args, job_type):
     start = time()
     if job_type in ("normal", "hybrid"):
-        update = update_registry.get("CedEvents."+process_name(job_type))
+        update = update_registry.get("MendeleyData."+process_name(job_type))
         if parsed_args.doi:
             parsed_args.id = clean_doi(parsed_args.doi)
             parsed_args.doi = None

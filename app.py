@@ -84,6 +84,7 @@ app.config["COMPRESS_DEBUG"] = compress_json
 # import publication
 # import version
 #
+# import mendeley_source
 # db.create_all()
 # commit_success = safe_commit(db)
 # if not commit_success:
