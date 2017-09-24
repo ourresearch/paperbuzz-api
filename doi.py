@@ -89,6 +89,7 @@ sources = [
 },
 {
 "events": [],
+"events_count": 55,
 "source_id": "unpaywall_views"
 }
 ]
@@ -110,14 +111,20 @@ class Doi(object):
         self.altmetrics.get()
         self.unpaywall_views.get()
 
-    def to_dict(self):
+    def altmetrics_dict_including_unpaywall_views(self):
         altmetrics_value = self.altmetrics.to_dict()
-        altmetrics_value["sources"] += [{
+        unpaywall_dict = {
                 "source_id": "unpaywall_views",
-                "events": self.unpaywall_views.to_dict()}]
+                "events": self.unpaywall_views.to_dict()}
+        unpaywall_dict["events_count"] = len(unpaywall_dict["events"])
+        altmetrics_value["sources"] += [unpaywall_dict]
+        return altmetrics_value
+
+    def to_dict(self):
+
         ret = {
             "doi": self.doi,
-            "altmetrics":  altmetrics_value,
+            "altmetrics":  self.altmetrics_dict_including_unpaywall_views(),
             "metadata": self.metadata.to_dict(),
             "open_access": self.open_access.to_dict(),
             "unpaywall_views": self.unpaywall_views.to_dict()
@@ -125,14 +132,6 @@ class Doi(object):
         return ret
 
 
-    def to_dict_hotness(self):
-        ret = {
-            "doi": self.doi,
-            "metadata": metadata,
-            "open_access": open_access,
-            "sources": sources,
-        }
-        return ret
 
 class AltmetricsForDoi(object):
     def __init__(self, doi):

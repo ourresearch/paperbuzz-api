@@ -7,9 +7,11 @@ import os
 import datetime
 from sqlalchemy.dialects.postgresql import JSONB
 from collections import defaultdict
+import requests
 
 from app import db
 from app import logger
+from doi import Doi
 from util import remove_punctuation
 
 discipline_lookup = {
@@ -44,47 +46,95 @@ discipline_lookup = {
     u'Unspecified': u'unspecified'
 }
 
-class MendeleyData(db.Model):
+class WeeklyStats(db.Model):
     id = db.Column(db.Text, primary_key=True)
     updated = db.Column(db.DateTime)
-    api_raw = db.Column(JSONB)
+    mendeley_api_raw = db.Column(JSONB)
+    oadoi_api_raw = db.Column(JSONB)
     main_discipline = db.Column(db.Text)
     num_main_discipline = db.Column(db.Numeric)
-    # num_unpaywall_events = db.Column(db.Numeric)
-    # num_ced_events = db.Column(db.Numeric)
-    # num_academic_ced_events = db.Column(db.Numeric)
-    # num_nonacademic_ced_events = db.Column(db.Numeric)
-    # is_open_access = db.Column(db.Boolean)
-    # week = db.Column(db.Text)
-    # ratio
+    num_unpaywall_events = db.Column(db.Numeric)
+    num_ced_events = db.Column(db.Numeric)
+    num_academic_unpaywall_events = db.Column(db.Numeric)
+    num_nonacademic_unpaywall_events = db.Column(db.Numeric)
+    radio_academic_unpaywall_events = db.Column(db.Numeric)
+    is_open_access = db.Column(db.Boolean)
+    week = db.Column(db.Numeric)
 
 
     def __init__(self, **kwargs):
         self.updated = datetime.datetime.utcnow()
-        super(MendeleyData, self).__init__(**kwargs)
+        super(WeeklyStats, self).__init__(**kwargs)
 
     def run(self):
         self.updated = datetime.datetime.utcnow()
-        self.api_raw = set_mendeley_data(self.id)
+        url = "http://api.oadoi.org/v2/{}?email=paperbuzz@impactstory.org".format(self.id)
+        r = requests.get(url)
+        self.oadoi_api_raw = r.json()
+        if self.oadoi_api_raw and "is_oa" in self.oadoi_api_raw:
+            self.is_open_access = self.oadoi_api_raw["is_oa"]
 
-        if not self.api_raw:
+
+    def run_mendeley(self):
+        self.updated = datetime.datetime.utcnow()
+        self.mendeley_api_raw = set_mendeley_data(self.id)
+
+        if not self.mendeley_api_raw:
             return
-        if not self.api_raw.get("reader_count_by_subdiscipline", None):
+        if not self.mendeley_api_raw.get("reader_count_by_subdiscipline", None):
             return
 
         self.num_main_discipline = 0
         self.main_discipline = None
         discipline_dict = defaultdict(int)
-        for discipline in self.api_raw["reader_count_by_subdiscipline"]:
-            discipline_dict[discipline_lookup[discipline]] += self.api_raw["reader_count_by_subdiscipline"][discipline][discipline]
+        for discipline in self.mendeley_api_raw["reader_count_by_subdiscipline"]:
+            discipline_dict[discipline_lookup[discipline]] += self.mendeley_api_raw["reader_count_by_subdiscipline"][discipline][discipline]
         for (discipline, num) in discipline_dict.iteritems():
             if num > self.num_main_discipline:
                 self.num_main_discipline = num
                 self.main_discipline = discipline
         logger.info(u"discipline for {} is {}={}".format(self.id, self.main_discipline, self.num_main_discipline))
 
+    def sources_dicts_no_events(self):
+        my_doi_obj = Doi(self.id)
+        my_doi_obj.altmetrics.get()
+        sources_dicts_with_events = my_doi_obj.altmetrics_dict_including_unpaywall_views()
+        sources_dicts_without_events = []
+        for sources_dict in sources_dicts_with_events["sources"]:
+            sources_dict_new = sources_dict
+            del sources_dict_new["events"]
+            sources_dicts_without_events.append(sources_dict_new)
+        return {"sources": sources_dicts_without_events}
+
+
+    def to_dict_hotness(self):
+        sources = [
+            {
+            "events": [],
+            "events_count": self.num_ced_events,
+            "events_count_by_day": [],
+            "source_id": "twitter"
+            },
+            {
+            "events": [],
+            "events_count": 2*self.num_ced_events,
+            "source_id": "unpaywall_views"
+            }
+            ]
+
+        metadata_keys = ["year", "journal_name", "journal_authors", "title"]
+        open_access_keys = ["best_oa_location", "is_oa", "journal_is_oa"]
+
+        ret = {
+            "doi": self.id,
+            "metadata": dict((k, v) for k, v in self.oadoi_api_raw.iteritems() if k in metadata_keys),
+            "open_access": dict((k, v) for k, v in self.oadoi_api_raw.iteritems() if k in open_access_keys),
+            "sources": sources
+        }
+        return ret
+
     def __repr__(self):
-        return u"<MendeleyData ({}, {}={})>".format(self.id, self.main_discipline, self.num_main_discipline)
+        return u"<WeeklyStats ({}, {}={})>".format(self.id, self.main_discipline, self.num_main_discipline)
 
 
 def get_mendeley_session():

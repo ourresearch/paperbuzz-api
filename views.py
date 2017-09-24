@@ -12,8 +12,9 @@ import requests
 import re
 
 from app import app
+from app import db
 from util import clean_doi
-from mendeley_source import discipline_lookup
+from weekly_stats import WeeklyStats
 
 from doi import Doi
 
@@ -94,28 +95,57 @@ def index_endpoint():
     })
 
 
+papers_by_discipline = {
+        "all": ["10.1080/01436597.2017.1369037", "10.1136/bmj.j4030", "10.7717/peerj.1262", "10.1038/549133a",
+                "10.1038/s41564-017-0012-7"],
+        "arts and humanities": ["10.1038/549158a", "10.1111/phpr.12438", "10.1002/ajpa.23308", "10.1038/541141a",
+                                "10.1038/s41598-017-08106-7"],
+        "brain and mind": ["10.1111/gbb.12373", "10.1038/s41562-017-0202-6", "10.1038/nn.4637", "10.3389/feduc.2017.00037",
+                           "10.1038/nm.4397"],
+        "business": ["10.7287/peerj.preprints.3210v1", "10.1257/aer.20160812", "10.1038/s41562-017-0191-5",
+                     "10.1287/mnsc.2017.2800", "10.1257/aer.20150243", "10.1371/journal.pone.0025995"],
+        "chemistry": ["10.1351/goldbook.c01034", "10.1038/s41467-017-00679-1", "10.1038/s41467-017-00950-5",
+                      "10.1038/nchem.2850", "10.1038/nchem.2853"],
+        "computing": ["10.1002/leap.1116", "10.1038/nature23461", "10.12688/f1000research.12037.1", "10.1002/leap.1118",
+                      "10.1016/j.dsp.2017.07.023"],
+        "engineering": ["10.1038/s41551-017-0127-4", "10.1038/s41467-017-00109-2", "10.1038/549026a", "10.1038/nmat4972",
+                        "10.1038/nature23668"],
+        "environment": ["10.1038/nature23878", "10.1038/nj7671-297a", "10.1038/nclimate3382", "10.1038/s41559-017-0305-5",
+                        "10.1007/s10584-017-1978-0"],
+        "health": ["10.1136/bmj.j4030", "10.1080/09581596.2017.1371844", "10.1136/bmj.j3961", "10.1056/nejmsa1702321",
+                   "10.1056/nejmicm1611578"],
+        "life science": ["10.7717/peerj.1262", "10.1038/549133a", "10.1038/s41564-017-0012-7", "10.1038/549146a",
+                         "10.1038/nrg.2017.65"],
+        "mathematics": ["10.1002/cncy.21915", "10.1103/physreve.96.032309", "10.1242/dev.153841",
+                        "10.1103/physrevlett.119.108301", "10.1038/s41598-017-07712-9"],
+        "physics and astronomy": ["10.1038/549143a", "10.1038/549149a", "10.1038/549131b", "10.1038/nphys4254",
+                                  "10.1038/nature23879"],
+        "social science": ["10.1080/01436597.2017.1369037", "10.1057/palcomms.2017.93", "10.1007/s13524-017-0611-1",
+                           "10.1111/dar.12596", "10.1038/s41562-017-0195-1"]
+    }
 
 # of form /2017/week-32
 @app.route("/v0/hot/2017/<week_string>", methods=["GET"])
 def get_hot_week_endpoint(week_string):
     week_num = week_string.split("-")[1]
-    doi = "http://doi.org/10.7717/peerj.3828"
-    my_doi = Doi(clean_doi(doi))
-    metadata = """"""
     response = []
 
     for facet_open in ["open", None]:
         for facet_audience in ["academic", "public", None]:
-            disciplines = list(set(discipline_lookup.values())) + [None]
-            for facet_discipline in disciplines:
-                papers = [my_doi for i in range(5)]
+            for facet_discipline in papers_by_discipline:
+                display_discipline = facet_discipline
+                if display_discipline == "all":
+                    display_discipline = None
+                doi_list = papers_by_discipline[facet_discipline]
+                papers = db.session.query(WeeklyStats).filter(WeeklyStats.id.in_(doi_list)).all()
                 response.append({
                     "filter_open": facet_open,
                     "filter_audience": facet_audience,
-                    "filter_discipline": facet_discipline,
+                    "filter_discipline": display_discipline,
                     "results": [paper.to_dict_hotness() for paper in papers]
                 })
     return jsonify({"list": response})
+
 
 
 

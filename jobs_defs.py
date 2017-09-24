@@ -1,7 +1,7 @@
 from jobs import update_registry
 from jobs import UpdateDbQueue
 from date_range import DateRange
-from mendeley_source import MendeleyData
+from weekly_stats import WeeklyStats
 
 # run with python doi_queue.py --dates --run
 update_registry.register(UpdateDbQueue(
@@ -10,5 +10,5 @@ update_registry.register(UpdateDbQueue(
 ))
 
 update_registry.register(UpdateDbQueue(
-    job=MendeleyData.run
+    job=WeeklyStats.run
 ))

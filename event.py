@@ -63,11 +63,16 @@ class UnpaywallEvent(db.Model):
     def location_type(self):
         if not self.insights:
             return None
-        user_type = self.insights["traits"]["user_type"]
-        if user_type == "college":
-            return True
-        else:
-            return False
+        try:
+            user_type = self.insights["traits"]["user_type"]
+            if user_type == "college":
+                return True
+            else:
+                return False
+        except KeyError:
+            return None
+
+
 
     def api_dict(self):
         return {
