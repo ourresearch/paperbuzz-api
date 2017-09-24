@@ -92,6 +92,28 @@ def index_endpoint():
 
 
 
+# of form /2017/week-32
+@app.route("/hot/2017/<week_string>", methods=["GET"])
+def get_hot_week_endpoint(week_string):
+    week_num = week_string.split("-")[1]
+    doi = "http://doi.org/10.7717/peerj.3828"
+    my_doi = Doi(clean_doi(doi))
+    metadata = """"""
+    response = []
+
+    for facet_open in ["open", None]:
+        for facet_audience in ["academic", "public", None]:
+            for facet_discipline in ["biology", "art", "engineering", "astronomy", "design", "philosophy", None]:
+                papers = [my_doi for i in range(5)]
+                response.append({
+                    "filter_open": facet_open,
+                    "filter_audience": facet_audience,
+                    "filter_discipline": facet_discipline,
+                    "results": [paper.to_dict_hotness() for paper in papers]
+                })
+    return jsonify({"list": response})
+
+
 
 @app.route("/doi/<path:doi>", methods=["GET"])
 def get_doi_endpoint(doi):
