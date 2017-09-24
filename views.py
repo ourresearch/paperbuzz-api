@@ -13,6 +13,7 @@ import re
 
 from app import app
 from util import clean_doi
+from mendeley_source import discipline_lookup
 
 from doi import Doi
 
@@ -81,6 +82,8 @@ def after_request_stuff(resp):
 
 
 @app.route('/', methods=["GET"])
+@app.route('/v0', methods=["GET"])
+@app.route('/v0/', methods=["GET"])
 def index_endpoint():
     return jsonify({
         "version": "0.1",
@@ -93,7 +96,7 @@ def index_endpoint():
 
 
 # of form /2017/week-32
-@app.route("/hot/2017/<week_string>", methods=["GET"])
+@app.route("/v0/hot/2017/<week_string>", methods=["GET"])
 def get_hot_week_endpoint(week_string):
     week_num = week_string.split("-")[1]
     doi = "http://doi.org/10.7717/peerj.3828"
@@ -103,7 +106,8 @@ def get_hot_week_endpoint(week_string):
 
     for facet_open in ["open", None]:
         for facet_audience in ["academic", "public", None]:
-            for facet_discipline in ["biology", "art", "engineering", "astronomy", "design", "philosophy", None]:
+            disciplines = list(set(discipline_lookup.values())) + [None]
+            for facet_discipline in disciplines:
                 papers = [my_doi for i in range(5)]
                 response.append({
                     "filter_open": facet_open,
@@ -115,7 +119,7 @@ def get_hot_week_endpoint(week_string):
 
 
 
-@app.route("/doi/<path:doi>", methods=["GET"])
+@app.route("/v0/doi/<path:doi>", methods=["GET"])
 def get_doi_endpoint(doi):
     my_doi = Doi(clean_doi(doi))
     my_doi.get()
@@ -123,7 +127,7 @@ def get_doi_endpoint(doi):
 
 
 
-@app.route("/event/<path:event_id>", methods=["GET"])
+@app.route("/v0/event/<path:event_id>", methods=["GET"])
 def get_event_endpoint(event_id):
     response = {
         "event_id": event_id
