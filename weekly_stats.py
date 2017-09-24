@@ -124,10 +124,15 @@ class WeeklyStats(db.Model):
 
         metadata_keys = ["year", "journal_name", "journal_authors", "title"]
         open_access_keys = ["best_oa_location", "is_oa", "journal_is_oa"]
+        metadata = dict((k, v) for k, v in self.oadoi_api_raw.iteritems() if k in metadata_keys)
+        if self.mendeley_api_raw:
+            metadata["abstract"] = self.mendeley_api_raw.get("abstract", None)
+        else:
+            metadata["abstract"] = None
 
         ret = {
             "doi": self.id,
-            "metadata": dict((k, v) for k, v in self.oadoi_api_raw.iteritems() if k in metadata_keys),
+            "metadata": metadata,
             "open_access": dict((k, v) for k, v in self.oadoi_api_raw.iteritems() if k in open_access_keys),
             "sources": sources
         }
