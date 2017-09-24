@@ -9,6 +9,7 @@ from sqlalchemy.dialects.postgresql import JSONB
 from collections import defaultdict
 
 from app import db
+from app import logger
 from util import remove_punctuation
 
 discipline_lookup = {
@@ -65,20 +66,25 @@ class MendeleyData(db.Model):
     def run(self):
         self.updated = datetime.datetime.utcnow()
         self.api_raw = set_mendeley_data(self.id)
+
+        if not self.api_raw:
+            return
+        if not self.api_raw.get("reader_count_by_subdiscipline", None):
+            return
+
         self.num_main_discipline = 0
         self.main_discipline = None
-
         discipline_dict = defaultdict(int)
-        if self.api_raw and "reader_count_by_subdiscipline" in self.api_raw:
-            for discipline in self.api_raw["reader_count_by_subdiscipline"]:
-                discipline_dict[discipline_lookup[discipline]] += self.api_raw["reader_count_by_subdiscipline"][discipline][discipline]
-            for (discipline, num) in discipline_dict.iteritems():
-                if num > self.num_main_discipline:
-                    self.num_main_discipline = num
-                    self.main_discipline = discipline
+        for discipline in self.api_raw["reader_count_by_subdiscipline"]:
+            discipline_dict[discipline_lookup[discipline]] += self.api_raw["reader_count_by_subdiscipline"][discipline][discipline]
+        for (discipline, num) in discipline_dict.iteritems():
+            if num > self.num_main_discipline:
+                self.num_main_discipline = num
+                self.main_discipline = discipline
+        logger.info(u"discipline for {} is {}={}".format(self.id, self.main_discipline, self.num_main_discipline))
 
     def __repr__(self):
-        return u"<MendeleyData ({})>".format(self.id)
+        return u"<MendeleyData ({}, {}={})>".format(self.id, self.main_discipline, self.num_main_discipline)
 
 
 def get_mendeley_session():

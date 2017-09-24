@@ -111,7 +111,7 @@ class UpdateDbQueue():
         self.job = kwargs["job"]
         self.method = self.job
         self.cls = self.job.im_class
-        self.chunk = kwargs.get("chunk", 1)
+        self.chunk = kwargs.get("chunk", 10)
         self.shortcut_fn = kwargs.get("shortcut_fn", None)
         self.shortcut_fn_per_chunk = kwargs.get("shortcut_fn_per_chunk", None)
         self.name = "{}.{}".format(self.cls.__name__, self.method.__name__)
