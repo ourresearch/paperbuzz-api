@@ -6,6 +6,7 @@ import mendeley as mendeley_lib
 import os
 import datetime
 from sqlalchemy.dialects.postgresql import JSONB
+from collections import defaultdict
 
 from app import db
 from util import remove_punctuation
@@ -15,12 +16,12 @@ discipline_lookup = {
     u'Design': u'arts and humanities',
     u'Philosophy': u'arts and humanities',
     u'Agricultural and Biological Sciences': u'life science',
-    u'Biochemistry: Genetics and Molecular Biology': u'life science',
+    u'Biochemistry, Genetics and Molecular Biology': u'life science',
     u'Immunology and Microbiology': u'life science',
     u'Veterinary Science and Veterinary Medicine': u'life science',
-    u'Business: Management and Accounting': u'business',
+    u'Business, Management and Accounting': u'business',
     u'Decision Sciences': u'business',
-    u'Economics: Econometrics and Finance': u'business',
+    u'Economics, Econometrics and Finance': u'business',
     u'Chemistry': u'chemistry',
     u'Computer Science': u'computing',
     u'Chemical Engineering': u'engineering',
@@ -31,7 +32,7 @@ discipline_lookup = {
     u'Environmental Science': u'environment',
     u'Medicine and Dentistry': u'health',
     u'Nursing and Health Professions': u'health',
-    u'Pharmacology: Toxicology and Pharmaceutical Science': u'health',
+    u'Pharmacology, Toxicology and Pharmaceutical Science': u'health',
     u'Sports and Recreations': u'health',
     u'Mathematics': u'mathematics',
     u'Physics and Astronomy': u'physics and astronomy',
@@ -45,9 +46,9 @@ discipline_lookup = {
 class MendeleyData(db.Model):
     id = db.Column(db.Text, primary_key=True)
     updated = db.Column(db.DateTime)
-    # api_raw = db.Column(JSONB)
-    # main_discipline = db.Column(db.Text)
-    # num_main_discipline = db.Column(db.Numeric)
+    api_raw = db.Column(JSONB)
+    main_discipline = db.Column(db.Text)
+    num_main_discipline = db.Column(db.Numeric)
     # num_unpaywall_events = db.Column(db.Numeric)
     # num_ced_events = db.Column(db.Numeric)
     # num_academic_ced_events = db.Column(db.Numeric)
@@ -62,7 +63,19 @@ class MendeleyData(db.Model):
         super(MendeleyData, self).__init__(**kwargs)
 
     def run(self):
+        self.updated = datetime.datetime.utcnow()
         self.api_raw = set_mendeley_data(self.id)
+        self.num_main_discipline = 0
+        self.main_discipline = None
+
+        discipline_dict = defaultdict(int)
+        if self.api_raw and "reader_count_by_subdiscipline" in self.api_raw:
+            for discipline in self.api_raw["reader_count_by_subdiscipline"]:
+                discipline_dict[discipline_lookup[discipline]] += self.api_raw["reader_count_by_subdiscipline"][discipline][discipline]
+            for (discipline, num) in discipline_dict.iteritems():
+                if num > self.num_main_discipline:
+                    self.num_main_discipline = num
+                    self.main_discipline = discipline
 
     def __repr__(self):
         return u"<MendeleyData ({})>".format(self.id)
