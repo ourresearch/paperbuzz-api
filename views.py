@@ -137,7 +137,7 @@ def get_hot_week_endpoint(week_string):
                 papers = db.session.query(WeeklyStats).filter(WeeklyStats.id.in_(doi_list)).all()
                 for paper in random.sample(papers, 3):
                     paper_dict = paper.to_dict_hotness()
-                    paper_dict["sort_score"] = paper.num_ced_events
+                    paper_dict["sort_score"] = paper.num_twitter_events + paper.num_unpaywall_events
 
                     # only save filters if they are restrictive
                     paper_dict["filters"] = {}

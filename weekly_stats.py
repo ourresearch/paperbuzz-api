@@ -80,8 +80,8 @@ class WeeklyStats(db.Model):
         unpaywall_events = UnpaywallEvent.query.filter(UnpaywallEvent.doi==self.id).all()
         unpaywall_events_this_week = [e for e in unpaywall_events if e.week==self.week]
         event_count_dict["unpaywall_views"] = len(unpaywall_events_this_week)
-        event_count_dict["unpaywall_views_academic"] = len([e for e in unpaywall_events if e.is_academic_location])
-        event_count_dict["unpaywall_views_nonacademic"] = len([e for e in unpaywall_events if not e.is_academic_location])
+        event_count_dict["unpaywall_views_academic"] = len([e for e in unpaywall_events_this_week if e.is_academic_location])
+        event_count_dict["unpaywall_views_nonacademic"] = len([e for e in unpaywall_events_this_week if not e.is_academic_location])
 
         sources = []
         for (source_id, num) in event_count_dict.iteritems():
@@ -148,20 +148,6 @@ class WeeklyStats(db.Model):
 
 
     def to_dict_hotness(self):
-        sources = [
-            {
-            "events": [],
-            "events_count": self.num_ced_events,
-            "events_count_by_day": [],
-            "source_id": "twitter"
-            },
-            {
-            "events": [],
-            "events_count": 2*self.num_ced_events,
-            "source_id": "unpaywall_views"
-            }
-            ]
-
         metadata_keys = ["year", "journal_name", "journal_authors", "title"]
         open_access_keys = ["best_oa_location", "is_oa", "journal_is_oa"]
         metadata = dict((k, v) for k, v in self.oadoi_api_raw.iteritems() if k in metadata_keys)
@@ -174,7 +160,7 @@ class WeeklyStats(db.Model):
             "doi": self.id,
             "metadata": metadata,
             "open_access": dict((k, v) for k, v in self.oadoi_api_raw.iteritems() if k in open_access_keys),
-            "sources": sources
+            "sources": self.sources
         }
         return ret
 
