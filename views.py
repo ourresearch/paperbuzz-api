@@ -15,6 +15,7 @@ import random
 from app import app
 from app import db
 from util import clean_doi
+from util import get_sql_answers
 from weekly_stats import WeeklyStats
 
 from doi import Doi
@@ -131,28 +132,52 @@ def get_hot_week_endpoint(week_string):
 
     random.seed(42)
     for facet_open in [True, None]:
+        if facet_open:
+            oa_where = "and is_open_access=true"
+        else:
+            oa_where = ""
         for facet_audience in ["academic", "public", None]:
-            for facet_discipline in papers_by_discipline:
-                doi_list = papers_by_discipline[facet_discipline]
-                papers = db.session.query(WeeklyStats).filter(WeeklyStats.id.in_(doi_list)).all()
-                for paper in random.sample(papers, 3):
-                    paper_dict = paper.to_dict_hotness()
-                    paper_dict["sort_score"] = paper.num_twitter_events + paper.num_unpaywall_events
+            if facet_audience=="academic":
+                academic_where = "and ratio_academic_unpaywall_events > 0.25"
+            elif facet_audience=="public":
+                academic_where = "and ratio_academic_unpaywall_events <= 0.25"
+            else:
+                academic_where = ""
+            query_template = """
+                    SELECT id
+                    FROM (SELECT id,
+                          rank() over (partition by main_discipline order by coalesce(num_twitter_events, 0)+coalesce(num_unpaywall_events, 0) desc nulls last) as rank
+                       FROM weekly_stats
+                       where num_unpaywall_events > 5
+                       {oa_where}
+                       {academic_where}
+                    ) t WHERE rank <= 3"""
+            query = query_template.format(oa_where=oa_where, academic_where=academic_where)
+            doi_list = get_sql_answers(db, query)
+            papers = db.session.query(WeeklyStats).filter(WeeklyStats.id.in_(doi_list)).all()
 
-                    # only save filters if they are restrictive
-                    paper_dict["filters"] = {}
-                    paper_dict["filters"]["topic"] = facet_discipline
-                    if facet_open:
-                        paper_dict["filters"]["open"] = facet_open
-                    if facet_audience:
-                        paper_dict["filters"]["audience"] = facet_audience
+            for paper in papers:
+                if not paper.main_discipline or paper.main_discipline == "unspecified":
+                    continue
 
-                    # dedup the papers, saving the most restrictive
-                    if paper.id in response_dict:
-                        if len(paper_dict["filters"].keys()) > (response_dict[paper.id]["filters"].keys()):
-                            response_dict[paper.id] = paper_dict
-                    else:
+                paper_dict = paper.to_dict_hotness()
+                paper_dict["sort_score"] = paper.num_twitter_events + paper.num_unpaywall_events
+
+                # only save filters if they are restrictive
+                paper_dict["filters"] = {}
+                paper_dict["filters"]["topic"] = paper.main_discipline
+                if facet_open:
+                    paper_dict["filters"]["open"] = paper.is_open_access
+                if facet_audience:
+                    paper_dict["filters"]["audience"] = facet_audience
+                    paper_dict["filters"]["academic_ratio"] = paper.ratio_academic_unpaywall_events
+
+                # dedup the papers, saving the most restrictive
+                if paper.id in response_dict:
+                    if len(paper_dict["filters"].keys()) > (response_dict[paper.id]["filters"].keys()):
                         response_dict[paper.id] = paper_dict
+                else:
+                    response_dict[paper.id] = paper_dict
     return jsonify({"list": response_dict.values()})
 
 
