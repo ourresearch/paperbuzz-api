@@ -1,98 +1,13 @@
+import datetime
+import shortuuid
+import hashlib
 import requests
+from sqlalchemy.dialects.postgresql import JSONB
+
+from app import db
 from source import make_event_source
 from event import CedEvent
 from event import UnpaywallEvent
-
-
-metadata = {
-    "DOI": "10.7717/peerj.3828",
-    "ISSN": [
-      "2167-8359"
-    ],
-    "URL": "http://dx.doi.org/10.7717/peerj.3828",
-    "abstract": "<jats:p>The phylogeny of the Salmonidae family, the only living one of the Order Salmoniformes, remains still unclear because of several reasons. Such reasons include insufficient taxon sampling and/or DNA information. The use of complete mitochondrial genomes (mitogenomics) could provide some light on it, but despite the high number of mitogenomes of species belonging to this family published during last years, an integrative work containing all this information has not been done. In this work, the phylogeny of 46 Salmonidae species was inferred from their mitogenomic sequences. Results include a Bayesian molecular-dated phylogenetic tree with very high statistical support showing Coregoninae and Salmoninae as sister subfamilies, as well as several new phylogenetic relationships among species and genus of the family. All these findings contribute to improve our understanding of the Salmonidae systematics and could have consequences on related evolutionary studies, as well as highlight the importance of revisiting phylogenies with integrative studies.</jats:p>",
-    "article-number": "e3828",
-    "author": [
-      {
-        "affiliation": [
-          {
-            "name": "Department of Biodiversity and Evolutionary Biology, National Museum of Natural Sciences (CSIC),  Madrid, Spain"
-          }
-        ],
-        "family": "Horreo",
-        "given": "Jose L."
-      }
-    ],
-    "container-title": "PeerJ",
-    "crossref_url": "https://api.crossref.org/works/10.7717/peerj.3828/transform/application/vnd.citationstyles.csl+json",
-    "issued": {
-      "date-parts": [
-        [
-          2017,
-          9,
-          18
-        ]
-      ]
-    },
-    "member": "4443",
-    "page": "e3828",
-    "relation": {
-      "cites": []
-    },
-    "score": 1.0,
-    "title": "Revisiting the mitogenomic phylogeny of Salmoninae: new insights thanks to recent sequencing advances",
-    "type": "article-journal",
-    "volume": "5"
-  }
-
-open_access = {
-    "best_oa_location": {
-      "evidence": "hybrid (via crossref license)",
-      "host_type": "publisher",
-      "is_best": True,
-      "license": "cc-by",
-      "updated": "2017-09-24T00:09:23.763770",
-      "url": "http://doi.org/10.7717/peerj.3828",
-      "version": "publishedVersion"
-    },
-    "data_standard": 1,
-    "doi": "10.7717/peerj.3828",
-    "is_oa": True,
-    "journal_is_oa": False,
-    "journal_issns": "2167-8359",
-    "journal_name": "PeerJ",
-    "oa_locations": [
-      {
-        "evidence": "hybrid (via crossref license)",
-        "host_type": "publisher",
-        "is_best": True,
-        "license": "cc-by",
-        "updated": "2017-09-24T00:09:23.763770",
-        "url": "http://doi.org/10.7717/peerj.3828",
-        "version": "publishedVersion"
-      }
-    ],
-    "oadoi_url": "https://api.oadoi.org/v2/10.7717/peerj.3828",
-    "publisher": "PeerJ",
-    "title": "Revisiting the mitogenomic phylogeny of Salmoninae: new insights thanks to recent sequencing advances",
-    "updated": "2017-09-24T00:09:23.754159",
-    "x_reported_noncompliant_copies": [],
-    "year": 2017
-  }
-
-sources = [
-{
-"events": [],
-"events_count": 29,
-"events_count_by_day": [],
-"source_id": "twitter"
-},
-{
-"events": [],
-"events_count": 55,
-"source_id": "unpaywall_views"
-}
-]
 
 
 

@@ -12,6 +12,8 @@ import requests
 from app import db
 from app import logger
 from doi import Doi
+from event import UnpaywallEvent
+from event import CedEvent
 from util import remove_punctuation
 
 discipline_lookup = {
@@ -51,16 +53,17 @@ class WeeklyStats(db.Model):
     updated = db.Column(db.DateTime)
     mendeley_api_raw = db.Column(JSONB)
     oadoi_api_raw = db.Column(JSONB)
+    sources = db.Column(JSONB)
     main_discipline = db.Column(db.Text)
     num_main_discipline = db.Column(db.Numeric)
     num_unpaywall_events = db.Column(db.Numeric)
+    num_twitter_events = db.Column(db.Numeric)
     num_ced_events = db.Column(db.Numeric)
     num_academic_unpaywall_events = db.Column(db.Numeric)
     num_nonacademic_unpaywall_events = db.Column(db.Numeric)
     radio_academic_unpaywall_events = db.Column(db.Numeric)
     is_open_access = db.Column(db.Boolean)
     week = db.Column(db.Numeric)
-
 
     def __init__(self, **kwargs):
         self.updated = datetime.datetime.utcnow()
@@ -74,6 +77,18 @@ class WeeklyStats(db.Model):
         if self.oadoi_api_raw and "is_oa" in self.oadoi_api_raw:
             self.is_open_access = self.oadoi_api_raw["is_oa"]
 
+        ced_events = CedEvent.query.filter(CedEvent.doi==self.doi).all()
+
+        self.num_twitter_events = 42
+
+        unpaywall_events = UnpaywallEvent.query.filter(UnpaywallEvent.doi==self.doi).all()
+        unpaywall_events_this_week = [e for e in unpaywall_events if e.week==37]
+
+        self.num_unpaywall_events = len(unpaywall_events_this_week)
+        self.num_academic_unpaywall_events = len([e for e in unpaywall_events if e.is_academic_location])
+        self.num_nonacademic_unpaywall_events = len([e for e in unpaywall_events if not e.is_academic_location])
+        if self.num_unpaywall_events:
+            radio_academic_unpaywall_events = float(self.num_academic_unpaywall_events)/self.num_unpaywall_events
 
     def run_mendeley(self):
         self.updated = datetime.datetime.utcnow()

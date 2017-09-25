@@ -130,7 +130,7 @@ def get_hot_week_endpoint(week_string):
     week_num = week_string.split("-")[1]
     response = []
 
-    for facet_open in ["open", None]:
+    for facet_open in [True, None]:
         for facet_audience in ["academic", "public", None]:
             for facet_discipline in papers_by_discipline:
                 display_discipline = facet_discipline
@@ -138,12 +138,12 @@ def get_hot_week_endpoint(week_string):
                     display_discipline = None
                 doi_list = papers_by_discipline[facet_discipline]
                 papers = db.session.query(WeeklyStats).filter(WeeklyStats.id.in_(doi_list)).all()
-                response.append({
-                    "filter_open": facet_open,
-                    "filter_audience": facet_audience,
-                    "filter_discipline": display_discipline,
-                    "results": [paper.to_dict_hotness() for paper in papers]
-                })
+                for paper in papers[0:2]:
+                    paper_dict = paper.to_dict_hotness()
+                    paper_dict["open"] = facet_open
+                    paper_dict["audience"] = facet_audience
+                    paper_dict["topic"] = display_discipline
+                    response.append(paper_dict)
     return jsonify({"list": response})
 
 

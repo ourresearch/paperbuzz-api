@@ -41,6 +41,10 @@ class UnpaywallEvent(db.Model):
         super(UnpaywallEvent, self).__init__(**kwargs)
 
     @property
+    def week(self):
+        return datetime.date(self.collected).isocalendar()[1]
+
+    @property
     def insights(self):
         if self.insights_list and self.insights_list[0]:
             return self.insights_list[0].insights
@@ -60,7 +64,7 @@ class UnpaywallEvent(db.Model):
         return self.insights["country"]["iso_code"]
 
     @property
-    def location_type(self):
+    def is_academic_location(self):
         if not self.insights:
             return None
         try:
@@ -80,7 +84,7 @@ class UnpaywallEvent(db.Model):
             "occurred_at": "{}00:00".format(self.collected.isoformat()[:-5]),
             "country": self.country,
             "country_iso": self.country_iso,
-            "is_college_location": self.location_type,
+            "is_college_location": self.is_academic_location,
             "author": None,
             "url": None
         }
