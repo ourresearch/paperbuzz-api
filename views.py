@@ -97,8 +97,6 @@ def index_endpoint():
 
 
 papers_by_discipline = {
-        "all": ["10.1080/01436597.2017.1369037", "10.1136/bmj.j4030", "10.7717/peerj.1262", "10.1038/549133a",
-                "10.1038/s41564-017-0012-7"],
         "arts and humanities": ["10.1038/549158a", "10.1111/phpr.12438", "10.1002/ajpa.23308", "10.1038/541141a",
                                 "10.1038/s41598-017-08106-7"],
         "brain and mind": ["10.1111/gbb.12373", "10.1038/s41562-017-0202-6", "10.1038/nn.4637", "10.3389/feduc.2017.00037",
@@ -135,21 +133,21 @@ def get_hot_week_endpoint(week_string):
     for facet_open in [True, None]:
         for facet_audience in ["academic", "public", None]:
             for facet_discipline in papers_by_discipline:
-                display_discipline = facet_discipline
-                if display_discipline == "all":
-                    display_discipline = None
                 doi_list = papers_by_discipline[facet_discipline]
                 papers = db.session.query(WeeklyStats).filter(WeeklyStats.id.in_(doi_list)).all()
                 for paper in random.sample(papers, 3):
                     paper_dict = paper.to_dict_hotness()
                     paper_dict["sort_score"] = paper.num_ced_events
+
+                    # only save filters if they are restrictive
                     paper_dict["filters"] = {}
-                    if display_discipline:
-                        paper_dict["filters"]["topic"] = display_discipline
+                    paper_dict["filters"]["topic"] = facet_discipline
                     if facet_open:
                         paper_dict["filters"]["open"] = facet_open
                     if facet_audience:
                         paper_dict["filters"]["audience"] = facet_audience
+
+                    # dedup the papers, saving the most restrictive
                     if paper.id in response_dict:
                         if len(paper_dict["filters"].keys()) > (response_dict[paper.id]["filters"].keys()):
                             response_dict[paper.id] = paper_dict
