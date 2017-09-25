@@ -69,6 +69,34 @@ class WeeklyStats(db.Model):
         self.updated = datetime.datetime.utcnow()
         super(WeeklyStats, self).__init__(**kwargs)
 
+    def set_sources(self):
+        event_count_dict = defaultdict(int)
+
+        ced_events = CedEvent.query.filter(CedEvent.doi==self.id).all()
+        ced_events_this_week = [e for e in ced_events if e.week==self.week]
+        for e in ced_events_this_week:
+            event_count_dict[e.source_id] += 1
+
+        unpaywall_events = UnpaywallEvent.query.filter(UnpaywallEvent.doi==self.id).all()
+        unpaywall_events_this_week = [e for e in unpaywall_events if e.week==self.week]
+        event_count_dict["unpaywall_views"] = len(unpaywall_events_this_week)
+        event_count_dict["unpaywall_views_academic"] = len([e for e in unpaywall_events if e.is_academic_location])
+        event_count_dict["unpaywall_views_nonacademic"] = len([e for e in unpaywall_events if not e.is_academic_location])
+
+        sources = []
+        for (source_id, num) in event_count_dict.iteritems():
+            sources.append({
+                "source_id": source_id,
+                "event_count": num
+            })
+        self.sources = sources
+
+    def get_event_count(self, source_id):
+        try:
+            return [s["event_count"] for s in self.sources if s["source_id"]==source_id][0]
+        except IndexError:
+            return 0
+
     def run(self):
         self.updated = datetime.datetime.utcnow()
         url = "http://api.oadoi.org/v2/{}?email=paperbuzz@impactstory.org".format(self.id)
@@ -77,18 +105,15 @@ class WeeklyStats(db.Model):
         if self.oadoi_api_raw and "is_oa" in self.oadoi_api_raw:
             self.is_open_access = self.oadoi_api_raw["is_oa"]
 
-        ced_events = CedEvent.query.filter(CedEvent.doi==self.doi).all()
+        self.set_sources()
+        self.num_twitter_events = self.get_event_count("twitter")
 
-        self.num_twitter_events = 42
-
-        unpaywall_events = UnpaywallEvent.query.filter(UnpaywallEvent.doi==self.doi).all()
-        unpaywall_events_this_week = [e for e in unpaywall_events if e.week==37]
-
-        self.num_unpaywall_events = len(unpaywall_events_this_week)
-        self.num_academic_unpaywall_events = len([e for e in unpaywall_events if e.is_academic_location])
-        self.num_nonacademic_unpaywall_events = len([e for e in unpaywall_events if not e.is_academic_location])
+        self.num_unpaywall_events = self.get_event_count("unpaywall_views")
+        self.num_academic_unpaywall_events = self.get_event_count("unpaywall_views_academic")
+        self.num_nonacademic_unpaywall_events = self.get_event_count("unpaywall_views_nonacademic")
         if self.num_unpaywall_events:
-            radio_academic_unpaywall_events = float(self.num_academic_unpaywall_events)/self.num_unpaywall_events
+            self.radio_academic_unpaywall_events = float(self.num_academic_unpaywall_events)/self.num_unpaywall_events
+
 
     def run_mendeley(self):
         self.updated = datetime.datetime.utcnow()

@@ -1,4 +1,5 @@
 import datetime
+import dateutil.parser
 import shortuuid
 import hashlib
 
@@ -42,7 +43,10 @@ class UnpaywallEvent(db.Model):
 
     @property
     def week(self):
-        return datetime.date(self.collected).isocalendar()[1]
+        d = self.collected
+        if isinstance(d, basestring):
+            d = dateutil.parser.parse(d)
+        return d.isocalendar()[1]
 
     @property
     def insights(self):
@@ -113,6 +117,13 @@ class CedEvent(db.Model):
         # this one has to be last
         self.uniqueness_key = self.get_uniqueness_key()
         super(CedEvent, self).__init__(**kwargs)
+
+    @property
+    def week(self):
+        d = self.occurred_at
+        if isinstance(d, basestring):
+            d = dateutil.parser.parse(d)
+        return d.isocalendar()[1]
 
     @property
     def action(self):
