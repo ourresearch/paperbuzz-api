@@ -140,6 +140,7 @@ def get_hot_week_endpoint(week_string):
                 papers = db.session.query(WeeklyStats).filter(WeeklyStats.id.in_(doi_list)).all()
                 for paper in papers[0:2]:
                     paper_dict = paper.to_dict_hotness()
+                    paper_dict["sort_score"] = paper.num_ced_events
                     paper_dict["filters"] = {
                         "open": facet_open,
                         "audience": facet_audience,
