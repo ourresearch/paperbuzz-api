@@ -61,7 +61,7 @@ class WeeklyStats(db.Model):
     num_ced_events = db.Column(db.Numeric)
     num_academic_unpaywall_events = db.Column(db.Numeric)
     num_nonacademic_unpaywall_events = db.Column(db.Numeric)
-    radio_academic_unpaywall_events = db.Column(db.Numeric)
+    ratio_academic_unpaywall_events = db.Column(db.Numeric)
     is_open_access = db.Column(db.Boolean)
     week = db.Column(db.Numeric)
 
@@ -112,7 +112,7 @@ class WeeklyStats(db.Model):
         self.num_academic_unpaywall_events = self.get_event_count("unpaywall_views_academic")
         self.num_nonacademic_unpaywall_events = self.get_event_count("unpaywall_views_nonacademic")
         if self.num_unpaywall_events:
-            self.radio_academic_unpaywall_events = float(self.num_academic_unpaywall_events)/self.num_unpaywall_events
+            self.ratio_academic_unpaywall_events = float(self.num_academic_unpaywall_events)/self.num_unpaywall_events
 
 
     def run_mendeley(self):
