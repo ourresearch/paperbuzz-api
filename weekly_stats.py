@@ -112,7 +112,7 @@ class WeeklyStats(db.Model):
             r = requests.get(url)
             try:
                 pmid = r.json()["esearchresult"]["idlist"][0]
-            except KeyError:
+            except (KeyError, IndexError):
                 pmid = None
 
             if pmid:
@@ -182,10 +182,8 @@ class WeeklyStats(db.Model):
         metadata_keys = ["year", "journal_name", "journal_authors", "title"]
         open_access_keys = ["best_oa_location", "is_oa", "journal_is_oa"]
         metadata = dict((k, v) for k, v in self.oadoi_api_raw.iteritems() if k in metadata_keys)
-        if self.mendeley_api_raw:
-            metadata["abstract"] = self.mendeley_api_raw.get("abstract", None)
-        else:
-            metadata["abstract"] = None
+        metadata["abstract"] = self.abstract
+        # also use other pubmed data here if no mendeley
 
         ret = {
             "doi": self.id,
