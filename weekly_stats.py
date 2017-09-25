@@ -4,6 +4,7 @@ from __future__ import absolute_import
 from mendeley.exception import MendeleyException
 import mendeley as mendeley_lib
 import os
+import re
 import datetime
 from sqlalchemy.dialects.postgresql import JSONB
 from collections import defaultdict
@@ -53,6 +54,7 @@ class WeeklyStats(db.Model):
     updated = db.Column(db.DateTime)
     mendeley_api_raw = db.Column(JSONB)
     oadoi_api_raw = db.Column(JSONB)
+    pubmed_api_raw = db.Column(JSONB)
     sources = db.Column(JSONB)
     main_discipline = db.Column(db.Text)
     num_main_discipline = db.Column(db.Numeric)
@@ -63,7 +65,9 @@ class WeeklyStats(db.Model):
     num_nonacademic_unpaywall_events = db.Column(db.Numeric)
     ratio_academic_unpaywall_events = db.Column(db.Numeric)
     is_open_access = db.Column(db.Boolean)
+    abstract = db.Column(db.Text)
     week = db.Column(db.Numeric)
+
 
     def __init__(self, **kwargs):
         self.updated = datetime.datetime.utcnow()
@@ -99,6 +103,33 @@ class WeeklyStats(db.Model):
 
     def run(self):
         self.updated = datetime.datetime.utcnow()
+
+        if self.mendeley_api_raw and self.mendeley_api_raw.get("abstract", None):
+            self.abstract = self.mendeley_api_raw.get("abstract", None)
+        else:
+            url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term={}[doi]&tool=paperbuzz&email=team@impactstory.org&retmode=json".format(self.id)
+            print url
+            r = requests.get(url)
+            try:
+                pmid = r.json()["esearchresult"]["idlist"][0]
+            except KeyError:
+                pmid = None
+
+            if pmid:
+                url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id={}&tool=paperbuzz&email=team@impactstory.org".format(pmid)
+                print url
+                r = requests.get(url)
+                abstract_hits = re.findall(u'abstract.*?"(.*?)"', r.text.replace("\n", ""), re.MULTILINE)
+                if abstract_hits:
+                    self.abstract = abstract_hits[0]
+                url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id={}&retmode=json&tool=paperbuzz&email=team@impactstory.org".format(pmid)
+                print url
+                r = requests.get(url)
+                self.pubmed_api_raw = r.json()["result"][pmid]
+        return
+
+
+
         url = "http://api.oadoi.org/v2/{}?email=paperbuzz@impactstory.org".format(self.id)
         r = requests.get(url)
         self.oadoi_api_raw = r.json()
