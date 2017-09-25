@@ -10,6 +10,7 @@ import logging
 import sys
 import requests
 import re
+import random
 
 from app import app
 from app import db
@@ -128,8 +129,9 @@ papers_by_discipline = {
 @app.route("/v0/hot/2017/<week_string>", methods=["GET"])
 def get_hot_week_endpoint(week_string):
     week_num = week_string.split("-")[1]
-    response = []
+    response_dict = {}
 
+    random.seed(42)
     for facet_open in [True, None]:
         for facet_audience in ["academic", "public", None]:
             for facet_discipline in papers_by_discipline:
@@ -138,16 +140,22 @@ def get_hot_week_endpoint(week_string):
                     display_discipline = None
                 doi_list = papers_by_discipline[facet_discipline]
                 papers = db.session.query(WeeklyStats).filter(WeeklyStats.id.in_(doi_list)).all()
-                for paper in papers[0:2]:
+                for paper in random.sample(papers, 3):
                     paper_dict = paper.to_dict_hotness()
                     paper_dict["sort_score"] = paper.num_ced_events
-                    paper_dict["filters"] = {
-                        "open": facet_open,
-                        "audience": facet_audience,
-                        "topic": display_discipline,
-                    }
-                    response.append(paper_dict)
-    return jsonify({"list": response})
+                    paper_dict["filters"] = {}
+                    if display_discipline:
+                        paper_dict["filters"]["topic"] = display_discipline
+                    if facet_open:
+                        paper_dict["filters"]["open"] = facet_open
+                    if facet_audience:
+                        paper_dict["filters"]["audience"] = facet_audience
+                    if paper.id in response_dict:
+                        if len(paper_dict["filters"].keys()) > (response_dict[paper.id]["filters"].keys()):
+                            response_dict[paper.id] = paper_dict
+                    else:
+                        response_dict[paper.id] = paper_dict
+    return jsonify({"list": response_dict.values()})
 
 
 
