@@ -51,21 +51,28 @@ discipline_lookup = {
 }
 
 photos = {
-    "10.1080/01436597.2017.1369037": "https://i.imgur.com/AZ8g46k.png",
-    "10.1136/bmj.j4030": "https://i.imgur.com/xLLK0do.png",
-    "10.1038/s41564-017-0012-7": "https://i.imgur.com/oGrxEsK.png",
-    "10.1038/549133a": "https://i.imgur.com/cUQU6lO.png",
-    "10.7717/peerj.1262": "https://i.imgur.com/sZmOngy.png",
-    "10.1038/nature.2017.22580": "https://i.imgur.com/SvWD2Y8.png",
-    "10.1002/leap.1116":		"https://i.imgur.com/cGKRXJl.png",
-    "10.1038/nrg.2017.65":		"https://i.imgur.com/uie4fum.png",
-    "10.1038/549149a":		"https://i.imgur.com/qgjZes4.png",
-    "10.1038/s41598-017-11721-z":		"https://i.imgur.com/j9Pqfuo.png",
-    "10.1056/nejmp1711886":		"https://i.imgur.com/407Jcs9.png",
-    "10.1038/549023a":		"https://i.imgur.com/B8oXDuI.png",
-    "10.1371/journal.pbio.2002173":		"https://i.imgur.com/KZs41pQ.png",
-    "10.1038/nature23878":		"https://i.imgur.com/oXpam6C.png",
-    "10.1038/549018a":		"https://i.imgur.com/EWkQNcJ.png"
+'10.1080/01436597.2017.1369037':'https://i.imgur.com/AZ8g46k.png',
+'10.1136/bmj.j4030':'https://i.imgur.com/xLLK0do.png',
+'10.1038/s41564-017-0012-7':'https://i.imgur.com/oGrxEsK.png',
+'10.1038/549133a':'https://i.imgur.com/cUQU6lO.png',
+'10.7717/peerj.1262':'https://i.imgur.com/sZmOngy.png',
+'10.1038/nature.2017.22580':'https://i.imgur.com/SvWD2Y8.png',
+'10.1002/leap.1116':'https://i.imgur.com/cGKRXJl.png',
+'10.1038/nrg.2017.65':'https://i.imgur.com/uie4fum.png',
+'10.1038/549149a':'https://i.imgur.com/qgjZes4.png',
+'10.1038/s41598-017-11721-z':'https://i.imgur.com/j9Pqfuo.png',
+'10.1056/nejmp1711886':'https://i.imgur.com/407Jcs9.png',
+'10.1038/549023a':'https://i.imgur.com/B8oXDuI.png',
+'10.1371/journal.pbio.2002173':'https://i.imgur.com/KZs41pQ.png',
+'10.1038/nature23878':'https://i.imgur.com/oXpam6C.png',
+'10.1038/549018a':'https://i.imgur.com/EWkQNcJ.png',
+'10.1016/j.cub.2014.03.022':'https://i.imgur.com/nl1gNRa.png',
+'10.1057/palcomms.2017.93':'https://i.imgur.com/08ChMe2.png',
+'10.1056/nejmoa1708337':'https://i.imgur.com/229NN3r.png',
+'10.1056/nejmoa1709684':'https://i.imgur.com/OvzqLLp.png',
+'10.1038/nature23879':'https://i.imgur.com/1UpBCgZ.png',
+'10.1038/nphys4254':'https://i.imgur.com/YIh9ngF.png',
+'10.1371/journal.pone.0183967':'https://i.imgur.com/sUIQyxe.png'
 }
 
 class WeeklyStats(db.Model):
