@@ -170,7 +170,10 @@ def get_hot_week_endpoint(week_string):
                     paper_dict["filters"]["open"] = paper.is_open_access
                 if facet_audience:
                     paper_dict["filters"]["audience"] = facet_audience
-                    paper_dict["filters"]["public_percent"] = round(100*(1/paper.ratio_academic_unpaywall_events), 0)
+                    if paper.ratio_academic_unpaywall_events:
+                        paper_dict["filters"]["public_percent"] = round(100*(1/paper.ratio_academic_unpaywall_events), 0)
+                    else:
+                        paper_dict["filters"]["public_percent"] = None
 
                 # dedup the papers, saving the most restrictive
                 if paper.id in response_dict:
