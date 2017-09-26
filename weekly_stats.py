@@ -50,10 +50,9 @@ discipline_lookup = {
     u'Unspecified': u'unspecified'
 }
 
-photos = {
-'10.1080/01436597.2017.1369037':'https://i.imgur.com/AZ8g46k.png',
+photos = {'10.1080/01436597.2017.1369037':'https://i.imgur.com/AZ8g46k.png',
 '10.1136/bmj.j4030':'https://i.imgur.com/xLLK0do.png',
-'10.1038/s41564-017-0012-7':'https://i.imgur.com/oGrxEsK.png',
+'10.1038/s41564-017-0012-7':'https://i.imgur.com/6InNONL.png',
 '10.1038/549133a':'https://i.imgur.com/cUQU6lO.png',
 '10.7717/peerj.1262':'https://i.imgur.com/sZmOngy.png',
 '10.1038/nature.2017.22580':'https://i.imgur.com/SvWD2Y8.png',
@@ -94,7 +93,9 @@ photos = {
 '10.1016/s0140-6736(17)32336-x':'https://i.imgur.com/75SzNhQ.png',
 '10.1038/s41598-017-12055-6':'https://i.imgur.com/yTyqbyV.png',
 '10.3389/fnhum.2016.00511':'https://i.imgur.com/7XwVvrS.png',
-'10.1136/bmj.311.7021.1668':'https://i.imgur.com/4npP5VA.png'
+'10.1136/bmj.311.7021.1668':'https://i.imgur.com/4npP5VA.png',
+'10.1371/journal.pone.0181970':'https://i.imgur.com/rWussar.png',
+'10.1088/1748-9326/aa815f':'https://i.imgur.com/un49AKi.png'
 }
 
 class WeeklyStats(db.Model):
