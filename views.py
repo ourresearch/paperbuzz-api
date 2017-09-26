@@ -171,7 +171,7 @@ def get_hot_week_endpoint(week_string):
                     if paper.ratio_academic_unpaywall_events:
                         paper_dict["filters"]["public_percent"] = round(100*(1-paper.ratio_academic_unpaywall_events), 0)
                     else:
-                        paper_dict["filters"]["public_percent"] = None
+                        paper_dict["filters"]["public_percent"] = 100
 
                 # dedup the papers, saving the most restrictive
                 if paper.id in response_dict:
