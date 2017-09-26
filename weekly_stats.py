@@ -145,7 +145,7 @@ class WeeklyStats(db.Model):
 
     def get_our_discipline(self, mendeley_discipline):
         schol_comm_title_words = [
-            "reproducability",
+            "reproducibility",
             "medical research",
             "open access",
             "open-access",
@@ -176,6 +176,7 @@ class WeeklyStats(db.Model):
             for word in schol_comm_title_words:
                 if word in self.title.lower():
                     return "scholarly communication"
+
         return our_discipline
 
     def run(self):
@@ -199,10 +200,16 @@ class WeeklyStats(db.Model):
             num_in_discipline = self.mendeley_api_raw["reader_count_by_subdiscipline"][mendeley_discipline][mendeley_discipline]
             discipline_dict[our_discipline] += num_in_discipline
 
+        total_in_all_disciplines = 0
         for (our_discipline, num) in discipline_dict.iteritems():
+            total_in_all_disciplines += num
             if num > self.num_main_discipline:
                 self.num_main_discipline = num
                 self.main_discipline = our_discipline
+
+        if total_in_all_disciplines < 5:
+            self.num_main_discipline = None
+            self.main_discipline = None
 
         logger.info(u"discipline for {} is {}={}".format(self.id, self.main_discipline, self.num_main_discipline))
 
@@ -244,8 +251,13 @@ class WeeklyStats(db.Model):
             "doi": self.id,
             "metadata": metadata,
             "open_access": dict((k, v) for k, v in self.oadoi_api_raw.iteritems() if k in open_access_keys),
-            "sources": self.sources
+            "sources": self.sources,
+            "debug": {}
         }
+
+        if self.mendeley_api_raw:
+            ret["debug"]["mendeley_disciplines"] = self.mendeley_api_raw["reader_count_by_subdiscipline"]
+
         return ret
 
     def __repr__(self):
