@@ -72,7 +72,17 @@ photos = {
 '10.1056/nejmoa1709684':'https://i.imgur.com/OvzqLLp.png',
 '10.1038/nature23879':'https://i.imgur.com/1UpBCgZ.png',
 '10.1038/nphys4254':'https://i.imgur.com/YIh9ngF.png',
-'10.1371/journal.pone.0183967':'https://i.imgur.com/sUIQyxe.png'
+'10.1371/journal.pone.0183967':'https://i.imgur.com/6GRL9fe.png',
+'10.1038/nclimate3382':'https://i.imgur.com/uQe4Hmj.png',
+'10.1038/nature23474':'https://i.imgur.com/VnZzcNJ.png',
+'10.1056/nejmra1608969':'https://i.imgur.com/pOjQfkC.png',
+'10.1038/s41467-017-00109-2':'https://i.imgur.com/T86Ls2t.png',
+'10.1038/s41559-017-0305-5':'https://i.imgur.com/vkcFEN0.png',
+'10.3389/feduc.2017.00037':'https://i.imgur.com/BQgDZBc.png',
+'10.1111/dar.12596':'https://i.imgur.com/TEdVR1K.png',
+'10.1038/s41562-017-0195-1':'https://i.imgur.com/QbZPG7z.png',
+'10.1038/nn.4637':'https://i.imgur.com/yBkSSOD.png',
+'10.1007/s00704-015-1597-5':'https://i.imgur.com/IFUxkcz.png'
 }
 
 class WeeklyStats(db.Model):
