@@ -25,14 +25,14 @@ discipline_lookup = {
     u'Biochemistry, Genetics and Molecular Biology': u'life science',
     u'Immunology and Microbiology': u'life science',
     u'Veterinary Science and Veterinary Medicine': u'life science',
-    u'Business, Management and Accounting': u'business',
-    u'Decision Sciences': u'business',
-    u'Economics, Econometrics and Finance': u'business',
-    u'Chemistry': u'chemistry',
-    u'Computer Science': u'computing',
-    u'Chemical Engineering': u'engineering',
-    u'Engineering': u'engineering',
-    u'Materials Science': u'engineering',
+    u'Business, Management and Accounting': u'society',
+    u'Decision Sciences': u'society',
+    u'Economics, Econometrics and Finance': u'society',
+    u'Chemistry': u'life science',
+    u'Computer Science': u'technology',
+    u'Chemical Engineering': u'life science',
+    u'Engineering': u'technology',
+    u'Materials Science': u'technology',
     u'Earth and Planetary Sciences': u'environment',
     u'Energy': u'environment',
     u'Environmental Science': u'environment',
@@ -40,12 +40,12 @@ discipline_lookup = {
     u'Nursing and Health Professions': u'health',
     u'Pharmacology, Toxicology and Pharmaceutical Science': u'health',
     u'Sports and Recreations': u'health',
-    u'Mathematics': u'mathematics',
+    u'Mathematics': u'technology',
     u'Physics and Astronomy': u'physics and astronomy',
     u'Neuroscience': u'brain and mind',
     u'Psychology': u'brain and mind',
-    u'Linguistics': u'social science',
-    u'Social Sciences': u'social science',
+    u'Linguistics': u'society',
+    u'Social Sciences': u'society',
     u'Unspecified': u'unspecified'
 }
 
@@ -101,8 +101,23 @@ class WeeklyStats(db.Model):
         except IndexError:
             return 0
 
-    def run(self):
+    def run_other_things(self):
         self.updated = datetime.datetime.utcnow()
+
+        url = "http://api.oadoi.org/v2/{}?email=paperbuzz@impactstory.org".format(self.id)
+        r = requests.get(url)
+        self.oadoi_api_raw = r.json()
+        if self.oadoi_api_raw and "is_oa" in self.oadoi_api_raw:
+            self.is_open_access = self.oadoi_api_raw["is_oa"]
+
+        self.set_sources()
+        self.num_twitter_events = self.get_event_count("twitter")
+
+        self.num_unpaywall_events = self.get_event_count("unpaywall_views")
+        self.num_academic_unpaywall_events = self.get_event_count("unpaywall_views_academic")
+        self.num_nonacademic_unpaywall_events = self.get_event_count("unpaywall_views_nonacademic")
+        if self.num_unpaywall_events:
+            self.ratio_academic_unpaywall_events = float(self.num_academic_unpaywall_events)/self.num_unpaywall_events
 
         if self.mendeley_api_raw and self.mendeley_api_raw.get("abstract", None):
             self.abstract = self.mendeley_api_raw.get("abstract", None)
@@ -126,30 +141,51 @@ class WeeklyStats(db.Model):
                 print url
                 r = requests.get(url)
                 self.pubmed_api_raw = r.json()["result"][pmid]
-        return
 
 
+    def get_our_discipline(self, mendeley_discipline):
+        schol_comm_title_words = [
+            "reproducability",
+            "medical research",
+            "open access",
+            "open-access",
+            "scientists",
+            "medical literature",
+            "journal",
+            "grey literature",
+            "gray literature",
+            "researcher",
+            "research funding",
+            "peer review",
+            "peer-review",
+            "preprint",
+            "academic",
+            "altmetric",
+            "google scholar",
+            "bibliometrics",
+            "data sharing",
+            "data management"
+        ]
+        our_discipline = discipline_lookup[mendeley_discipline]
+        if self.title:
+            if our_discipline == "physics and astronomy":
+                if "gender" in self.title.lower():
+                    return "society"
+                if "comput" in self.title.lower():
+                    return "technology"
+            for word in schol_comm_title_words:
+                if word in self.title.lower():
+                    return "scholarly communication"
+        return our_discipline
 
-        url = "http://api.oadoi.org/v2/{}?email=paperbuzz@impactstory.org".format(self.id)
-        r = requests.get(url)
-        self.oadoi_api_raw = r.json()
-        if self.oadoi_api_raw and "is_oa" in self.oadoi_api_raw:
-            self.is_open_access = self.oadoi_api_raw["is_oa"]
-
-        self.set_sources()
-        self.num_twitter_events = self.get_event_count("twitter")
-
-        self.num_unpaywall_events = self.get_event_count("unpaywall_views")
-        self.num_academic_unpaywall_events = self.get_event_count("unpaywall_views_academic")
-        self.num_nonacademic_unpaywall_events = self.get_event_count("unpaywall_views_nonacademic")
-        if self.num_unpaywall_events:
-            self.ratio_academic_unpaywall_events = float(self.num_academic_unpaywall_events)/self.num_unpaywall_events
-
-
-    def run_mendeley(self):
+    def run(self):
         self.updated = datetime.datetime.utcnow()
-        self.mendeley_api_raw = set_mendeley_data(self.id)
 
+        # if not mendeley data, call it
+        if not self.mendeley_api_raw:
+            self.mendeley_api_raw = set_mendeley_data(self.id)
+
+        # if not there now, return
         if not self.mendeley_api_raw:
             return
         if not self.mendeley_api_raw.get("reader_count_by_subdiscipline", None):
@@ -158,13 +194,18 @@ class WeeklyStats(db.Model):
         self.num_main_discipline = 0
         self.main_discipline = None
         discipline_dict = defaultdict(int)
-        for discipline in self.mendeley_api_raw["reader_count_by_subdiscipline"]:
-            discipline_dict[discipline_lookup[discipline]] += self.mendeley_api_raw["reader_count_by_subdiscipline"][discipline][discipline]
-        for (discipline, num) in discipline_dict.iteritems():
+        for mendeley_discipline in self.mendeley_api_raw["reader_count_by_subdiscipline"]:
+            our_discipline = self.get_our_discipline(mendeley_discipline)
+            num_in_discipline = self.mendeley_api_raw["reader_count_by_subdiscipline"][mendeley_discipline][mendeley_discipline]
+            discipline_dict[our_discipline] += num_in_discipline
+
+        for (our_discipline, num) in discipline_dict.iteritems():
             if num > self.num_main_discipline:
                 self.num_main_discipline = num
-                self.main_discipline = discipline
+                self.main_discipline = our_discipline
+
         logger.info(u"discipline for {} is {}={}".format(self.id, self.main_discipline, self.num_main_discipline))
+
 
     def sources_dicts_no_events(self):
         my_doi_obj = Doi(self.id)
@@ -177,12 +218,26 @@ class WeeklyStats(db.Model):
             sources_dicts_without_events.append(sources_dict_new)
         return {"sources": sources_dicts_without_events}
 
+    @property
+    def display_abstract(self):
+        if not self.abstract:
+            return None
+        abstract = self.abstract
+        abstract = abstract.replace("<p>", " ")
+        abstract = abstract.replace("</p>", " ")
+        return abstract
+
+    @property
+    def title(self):
+        if not self.oadoi_api_raw:
+            return None
+        return self.oadoi_api_raw.get("title", None)
 
     def to_dict_hotness(self):
         metadata_keys = ["year", "journal_name", "journal_authors", "title"]
         open_access_keys = ["best_oa_location", "is_oa", "journal_is_oa"]
         metadata = dict((k, v) for k, v in self.oadoi_api_raw.iteritems() if k in metadata_keys)
-        metadata["abstract"] = self.abstract
+        metadata["abstract"] = self.display_abstract
         # also use other pubmed data here if no mendeley
 
         ret = {

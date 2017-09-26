@@ -258,8 +258,8 @@ def run(parsed_args, job_type):
     logger.info(u"finished update in {} seconds".format(elapsed(start)))
 
     if job_type in ("normal", "hybrid"):
-        from date_range import CedEvents
-        my_event = CedEvents.query.get(parsed_args.id)
+        from event import CedEvent
+        my_event = CedEvent.query.get(parsed_args.id)
         pprint(my_event)
 
 

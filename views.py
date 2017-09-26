@@ -138,9 +138,9 @@ def get_hot_week_endpoint(week_string):
             oa_where = ""
         for facet_audience in ["academic", "public", None]:
             if facet_audience=="academic":
-                academic_where = "and ratio_academic_unpaywall_events > 0.25"
+                academic_where = "and ratio_academic_unpaywall_events > 0.4"
             elif facet_audience=="public":
-                academic_where = "and ratio_academic_unpaywall_events <= 0.25"
+                academic_where = "and ratio_academic_unpaywall_events <= 0.1"
             else:
                 academic_where = ""
             query_template = """
