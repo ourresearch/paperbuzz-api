@@ -50,6 +50,15 @@ discipline_lookup = {
     u'Unspecified': u'unspecified'
 }
 
+photos = {
+    "10.1080/01436597.2017.1369037": "https://i.imgur.com/AZ8g46k.png",
+    "10.1136/bmj.j4030": "https://i.imgur.com/xLLK0do.png",
+    "10.1038/s41564-017-0012-7": "https://i.imgur.com/oGrxEsK.png",
+    "10.1038/549133a": "https://i.imgur.com/cUQU6lO.png",
+    "10.7717/peerj.1262	669": "https://i.imgur.com/sZmOngy.png",
+    "10.1038/nature.2017.22580": "https://i.imgur.com/SvWD2Y8.png"
+}
+
 class WeeklyStats(db.Model):
     id = db.Column(db.Text, primary_key=True)
     updated = db.Column(db.DateTime)
@@ -271,11 +280,14 @@ class WeeklyStats(db.Model):
             "metadata": metadata,
             "open_access": dict((k, v) for k, v in self.oadoi_api_raw.iteritems() if k in open_access_keys),
             "sources": self.sources,
+            "photo": photos.get(self.id, None)
             "debug": {}
         }
 
         if self.mendeley_api_raw:
             ret["debug"]["mendeley_disciplines"] = self.mendeley_api_raw["reader_count_by_subdiscipline"]
+
+
 
         return ret
 
