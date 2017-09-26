@@ -56,7 +56,16 @@ photos = {
     "10.1038/s41564-017-0012-7": "https://i.imgur.com/oGrxEsK.png",
     "10.1038/549133a": "https://i.imgur.com/cUQU6lO.png",
     "10.7717/peerj.1262": "https://i.imgur.com/sZmOngy.png",
-    "10.1038/nature.2017.22580": "https://i.imgur.com/SvWD2Y8.png"
+    "10.1038/nature.2017.22580": "https://i.imgur.com/SvWD2Y8.png",
+    "10.1002/leap.1116":		"https://i.imgur.com/cGKRXJl.png",
+    "10.1038/nrg.2017.65":		"https://i.imgur.com/uie4fum.png",
+    "10.1038/549149a":		"https://i.imgur.com/qgjZes4.png",
+    "10.1038/s41598-017-11721-z":		"https://i.imgur.com/j9Pqfuo.png",
+    "10.1056/nejmp1711886":		"https://i.imgur.com/407Jcs9.png",
+    "10.1038/549023a":		"https://i.imgur.com/B8oXDuI.png",
+    "10.1371/journal.pbio.2002173":		"https://i.imgur.com/KZs41pQ.png",
+    "10.1038/nature23878":		"https://i.imgur.com/oXpam6C.png",
+    "10.1038/549018a":		"https://i.imgur.com/EWkQNcJ.png"
 }
 
 class WeeklyStats(db.Model):
