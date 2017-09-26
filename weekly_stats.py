@@ -55,7 +55,7 @@ photos = {
     "10.1136/bmj.j4030": "https://i.imgur.com/xLLK0do.png",
     "10.1038/s41564-017-0012-7": "https://i.imgur.com/oGrxEsK.png",
     "10.1038/549133a": "https://i.imgur.com/cUQU6lO.png",
-    "10.7717/peerj.1262	669": "https://i.imgur.com/sZmOngy.png",
+    "10.7717/peerj.1262": "https://i.imgur.com/sZmOngy.png",
     "10.1038/nature.2017.22580": "https://i.imgur.com/SvWD2Y8.png"
 }
 
@@ -284,10 +284,8 @@ class WeeklyStats(db.Model):
             "debug": {}
         }
 
-        if self.mendeley_api_raw:
-            ret["debug"]["mendeley_disciplines"] = self.mendeley_api_raw["reader_count_by_subdiscipline"]
-
-
+        # if self.mendeley_api_raw:
+        #     ret["debug"]["mendeley_disciplines"] = self.mendeley_api_raw["reader_count_by_subdiscipline"]
 
         return ret
 
