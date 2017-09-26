@@ -171,7 +171,7 @@ def get_hot_week_endpoint(week_string):
                 if facet_audience:
                     paper_dict["filters"]["audience"] = facet_audience
                     if paper.ratio_academic_unpaywall_events:
-                        paper_dict["filters"]["public_percent"] = round(100*(100-paper.ratio_academic_unpaywall_events), 0)
+                        paper_dict["filters"]["public_percent"] = round(100*(1-paper.ratio_academic_unpaywall_events), 0)
                     else:
                         paper_dict["filters"]["public_percent"] = None
 
