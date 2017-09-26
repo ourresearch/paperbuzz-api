@@ -113,7 +113,7 @@ class WeeklyStats(db.Model):
                 text_after_header = text.split("</header", 1)[1]
                 text_after_p = text_after_header.split("																						<p>", 1)[1]
                 clean_text = clean_html(text_after_p)
-                print clean_text[0:1000]
+                # print clean_text[0:1000]
                 self.abstract = clean_text[0:1000]
 
 
