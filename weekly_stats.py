@@ -16,6 +16,7 @@ from doi import Doi
 from event import UnpaywallEvent
 from event import CedEvent
 from util import remove_punctuation
+from util import clean_html
 
 discipline_lookup = {
     u'Arts and Humanities': u'arts and humanities',
@@ -101,6 +102,21 @@ class WeeklyStats(db.Model):
         except IndexError:
             return 0
 
+    # get abstracts
+    def run(self):
+        self.updated = datetime.datetime.utcnow()
+
+        if not self.abstract:
+            r = requests.get("http://doi.org/{}".format(self.id))
+            text = r.text
+            if u'</header>' in text:
+                text_after_header = text.split("</header", 1)[1]
+                text_after_p = text_after_header.split("																						<p>", 1)[1]
+                clean_text = clean_html(text_after_p)
+                print clean_text[0:1000]
+                self.abstract = clean_text[0:1000]
+
+
     def run_other_things(self):
         self.updated = datetime.datetime.utcnow()
 
@@ -179,7 +195,7 @@ class WeeklyStats(db.Model):
 
         return our_discipline
 
-    def run(self):
+    def run_disciplines(self):
         self.updated = datetime.datetime.utcnow()
 
         # if not mendeley data, call it
