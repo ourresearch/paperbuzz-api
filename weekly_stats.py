@@ -82,7 +82,19 @@ photos = {
 '10.1111/dar.12596':'https://i.imgur.com/TEdVR1K.png',
 '10.1038/s41562-017-0195-1':'https://i.imgur.com/QbZPG7z.png',
 '10.1038/nn.4637':'https://i.imgur.com/yBkSSOD.png',
-'10.1007/s00704-015-1597-5':'https://i.imgur.com/IFUxkcz.png'
+'10.1007/s00704-015-1597-5':'https://i.imgur.com/IFUxkcz.png',
+'10.1038/ijo.2017.220':'https://i.imgur.com/SrhhXtA.png',
+'10.1007/s10899-009-9174-4':'https://i.imgur.com/pi4ych8.png',
+'10.1007/s10584-017-1978-0':'https://i.imgur.com/4tdNWou.png',
+'10.1002/ajpa.23308':'https://i.imgur.com/qh3UcfN.png',
+'10.1038/s41598-017-10675-6':'https://i.imgur.com/c2UqUBX.png',
+'10.1038/s41598-017-09250-w':'https://i.imgur.com/UpD1XtU.png',
+'10.1136/bmj.38705.470590.55':'https://i.imgur.com/Yeggq6e.png',
+'10.3758/s13423-017-1343-3':'https://i.imgur.com/zMsWBPA.png',
+'10.1016/s0140-6736(17)32336-x':'https://i.imgur.com/75SzNhQ.png',
+'10.1038/s41598-017-12055-6':'https://i.imgur.com/yTyqbyV.png',
+'10.3389/fnhum.2016.00511':'https://i.imgur.com/7XwVvrS.png',
+'10.1136/bmj.311.7021.1668':'https://i.imgur.com/4npP5VA.png'
 }
 
 class WeeklyStats(db.Model):
