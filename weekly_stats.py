@@ -280,7 +280,7 @@ class WeeklyStats(db.Model):
             "metadata": metadata,
             "open_access": dict((k, v) for k, v in self.oadoi_api_raw.iteritems() if k in open_access_keys),
             "sources": self.sources,
-            "photo": photos.get(self.id, None)
+            "photo": photos.get(self.id, None),
             "debug": {}
         }
 
