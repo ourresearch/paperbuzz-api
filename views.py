@@ -179,7 +179,10 @@ def get_hot_week_endpoint(week_string):
                         response_dict[paper.id] = paper_dict
                 else:
                     response_dict[paper.id] = paper_dict
-    return jsonify({"list": response_dict.values()})
+        response = response_dict.values()
+        response = sorted(response, key=lambda k: k['sort_score'], reverse=True)
+
+    return jsonify({"list": response})
 
 
 
