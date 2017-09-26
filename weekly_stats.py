@@ -62,7 +62,7 @@ photos = {
 '10.1038/s41564-017-0012-7':'https://i.imgur.com/6InNONL.png',
 '10.1038/549133a':'https://i.imgur.com/cUQU6lO.png',
 '10.7717/peerj.1262':'https://i.imgur.com/sZmOngy.png',
-'10.1038/nature.2017.22580':'https://i.imgur.com/SvWD2Y8.png',
+'10.1038/nature.2017.22580':'https://i.imgur.com/koJ22Wk.png',
 '10.1002/leap.1116':'https://i.imgur.com/cGKRXJl.png',
 '10.1038/nrg.2017.65':'https://i.imgur.com/uie4fum.png',
 '10.1038/549149a':'https://i.imgur.com/qgjZes4.png',
@@ -101,7 +101,7 @@ photos = {
 '10.1136/bmj.311.7021.1668':'https://i.imgur.com/4npP5VA.png',
 '10.1038/nature23651':'https://i.imgur.com/xH84ajU.png',
 '10.1371/journal.pone.0181970':'https://i.imgur.com/rWussar.png',
-'10.1088/1748-9326/aa815f':'https://i.imgur.com/un49AKi.png',
+'10.1088/1748-9326/aa815f':'https://i.imgur.com/wn9rUT5.png',
 '10.1038/nature23681':'https://i.imgur.com/cUICqNA.png',
 '10.1103/physrevlett.116.061102':'https://i.imgur.com/vKiKVCy.png',
 '10.1016/j.joi.2017.08.007':'https://i.imgur.com/z6RP6TN.png',
@@ -109,7 +109,7 @@ photos = {
 '10.1038/nature23459':'https://i.imgur.com/gC7oDpy.png',
 '10.1103/physreve.96.030101':'https://i.imgur.com/VAb0Wjj.png',
 '10.1038/s41562-017-0082':'https://i.imgur.com/tVs9ONj.png',
-'10.1136/bmjopen-2017-016942':'https://i.imgur.com/LJrFBtQ.png',
+'10.1136/bmjopen-2017-016942':'https://i.imgur.com/yWOubE3.png',
 '10.1038/s41598-017-07948-5':'https://i.imgur.com/uGGxpWZ.png',
 '10.1007/978-3-319-67389-9_7':'https://i.imgur.com/e8eVWrE.png',
 '10.1038/ngeo3017':'https://i.imgur.com/1bEyVeX.png',
@@ -117,7 +117,20 @@ photos = {
 '10.1038/s41598-017-09429-1':'https://i.imgur.com/6GHoU5b.png',
 '10.1038/s41467-017-00378-x':'https://i.imgur.com/fyQMWrM.png',
 '10.1038/srep00754':'https://i.imgur.com/9IRFQGh.png',
-'10.1093/afraf/adw030':'https://i.imgur.com/7F1ngrs.png'
+'10.1093/afraf/adw030':'https://i.imgur.com/7F1ngrs.png',
+'10.1103/physrevlett.118.204101':'https://i.imgur.com/GozQ0LI.jpg',
+'10.1038/533452a':'https://i.imgur.com/FuREqtu.png',
+'10.3390/mi5020139':'https://i.imgur.com/1Y9ZXFl.png',
+'10.1088/0953-8984/17/2/l06':'https://i.imgur.com/0AwY3yx.png',
+'10.1103/physrevb.74.104405':'https://i.imgur.com/uv69jzk.png',
+'10.1080/03057925.2016.1138396':'https://i.imgur.com/jEpkFaP.png',
+'10.17159/sajs.2017/20170010':'https://i.imgur.com/6I4b2Ku.png',
+'10.22269/170207':'https://i.imgur.com/zefb3z9.png',
+'10.1038/538446a':'https://i.imgur.com/E389P27.png',
+'10.1029/2005wr004820':'https://i.imgur.com/o7JWepN.png',
+'10.1038/srep21691':'https://i.imgur.com/B4KuMtm.png',
+'10.1371/journal.pone.0176896':'https://i.imgur.com/XdPu3Qf.png',
+'10.1088/1748-9326/9/10/104008':'https://i.imgur.com/erLpug4.png'
 }
 
 class WeeklyStats(db.Model):
