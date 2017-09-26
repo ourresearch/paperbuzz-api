@@ -50,52 +50,69 @@ discipline_lookup = {
     u'Unspecified': u'unspecified'
 }
 
-photos = {'10.1080/01436597.2017.1369037':'https://i.imgur.com/AZ8g46k.png',
-'10.1136/bmj.j4030':'https://i.imgur.com/xLLK0do.png',
-'10.1038/s41564-017-0012-7':'https://i.imgur.com/6InNONL.png',
-'10.1038/549133a':'https://i.imgur.com/cUQU6lO.png',
-'10.7717/peerj.1262':'https://i.imgur.com/sZmOngy.png',
-'10.1038/nature.2017.22580':'https://i.imgur.com/SvWD2Y8.png',
-'10.1002/leap.1116':'https://i.imgur.com/cGKRXJl.png',
-'10.1038/nrg.2017.65':'https://i.imgur.com/uie4fum.png',
-'10.1038/549149a':'https://i.imgur.com/qgjZes4.png',
-'10.1038/s41598-017-11721-z':'https://i.imgur.com/j9Pqfuo.png',
-'10.1056/nejmp1711886':'https://i.imgur.com/407Jcs9.png',
-'10.1038/549023a':'https://i.imgur.com/B8oXDuI.png',
-'10.1371/journal.pbio.2002173':'https://i.imgur.com/KZs41pQ.png',
-'10.1038/nature23878':'https://i.imgur.com/oXpam6C.png',
-'10.1038/549018a':'https://i.imgur.com/EWkQNcJ.png',
-'10.1016/j.cub.2014.03.022':'https://i.imgur.com/nl1gNRa.png',
-'10.1057/palcomms.2017.93':'https://i.imgur.com/08ChMe2.png',
-'10.1056/nejmoa1708337':'https://i.imgur.com/229NN3r.png',
-'10.1056/nejmoa1709684':'https://i.imgur.com/OvzqLLp.png',
-'10.1038/nature23879':'https://i.imgur.com/1UpBCgZ.png',
-'10.1038/nphys4254':'https://i.imgur.com/YIh9ngF.png',
-'10.1371/journal.pone.0183967':'https://i.imgur.com/6GRL9fe.png',
-'10.1038/nclimate3382':'https://i.imgur.com/uQe4Hmj.png',
-'10.1038/nature23474':'https://i.imgur.com/VnZzcNJ.png',
-'10.1056/nejmra1608969':'https://i.imgur.com/pOjQfkC.png',
-'10.1038/s41467-017-00109-2':'https://i.imgur.com/T86Ls2t.png',
-'10.1038/s41559-017-0305-5':'https://i.imgur.com/CCqEXtd.png',
-'10.3389/feduc.2017.00037':'https://i.imgur.com/BQgDZBc.png',
-'10.1111/dar.12596':'https://i.imgur.com/z93iJAn.png',
-'10.1038/s41562-017-0195-1':'https://i.imgur.com/QbZPG7z.png',
-'10.1038/nn.4637':'https://i.imgur.com/yBkSSOD.png',
-'10.1007/s00704-015-1597-5':'https://i.imgur.com/IFUxkcz.png',
-'10.1038/ijo.2017.220':'https://i.imgur.com/SrhhXtA.png',
-'10.1007/s10899-009-9174-4':'https://i.imgur.com/pi4ych8.png',
-'10.1007/s10584-017-1978-0':'https://i.imgur.com/4tdNWou.png',
-'10.1002/ajpa.23308':'https://i.imgur.com/qh3UcfN.png',
-'10.1038/s41598-017-10675-6':'https://i.imgur.com/c2UqUBX.png',
-'10.1038/s41598-017-09250-w':'https://i.imgur.com/UpD1XtU.png',
-'10.1136/bmj.38705.470590.55':'https://i.imgur.com/Yeggq6e.png',
-'10.3758/s13423-017-1343-3':'https://i.imgur.com/zMsWBPA.png',
-'10.1016/s0140-6736(17)32336-x':'https://i.imgur.com/75SzNhQ.png',
-'10.1038/s41598-017-12055-6':'https://i.imgur.com/yTyqbyV.png',
-'10.3389/fnhum.2016.00511':'https://i.imgur.com/7XwVvrS.png',
-'10.1136/bmj.311.7021.1668':'https://i.imgur.com/4npP5VA.png',
-'10.1371/journal.pone.0181970':'https://i.imgur.com/rWussar.png',
-'10.1088/1748-9326/aa815f':'https://i.imgur.com/un49AKi.png'
+discipline_overrides = {
+    "10.1016/j.joi.2017.08.007": "scholarly communication",
+    "10.1038/549023a": "scholarly communication",
+    "10.1038/549018a": "scholarly communication"
+}
+
+photos = {
+    '10.1080/01436597.2017.1369037':'https://i.imgur.com/AZ8g46k.png',
+    '10.1136/bmj.j4030':'https://i.imgur.com/xLLK0do.png',
+    '10.1038/s41564-017-0012-7':'https://i.imgur.com/6InNONL.png',
+    '10.1038/549133a':'https://i.imgur.com/cUQU6lO.png',
+    '10.7717/peerj.1262':'https://i.imgur.com/sZmOngy.png',
+    '10.1038/nature.2017.22580':'https://i.imgur.com/SvWD2Y8.png',
+    '10.1002/leap.1116':'https://i.imgur.com/cGKRXJl.png',
+    '10.1038/nrg.2017.65':'https://i.imgur.com/uie4fum.png',
+    '10.1038/549149a':'https://i.imgur.com/qgjZes4.png',
+    '10.1038/s41598-017-11721-z':'https://i.imgur.com/j9Pqfuo.png',
+    '10.1056/nejmp1711886':'https://i.imgur.com/407Jcs9.png',
+    '10.1371/journal.pbio.2002173':'https://i.imgur.com/KZs41pQ.png',
+    '10.1038/nature23878':'https://i.imgur.com/oXpam6C.png',
+    '10.1016/j.cub.2014.03.022':'https://i.imgur.com/nl1gNRa.png',
+    '10.1057/palcomms.2017.93':'https://i.imgur.com/08ChMe2.png',
+    '10.1056/nejmoa1708337':'https://i.imgur.com/229NN3r.png',
+    '10.1056/nejmoa1705915':'https://i.imgur.com/5C4q3nz.png',
+    '10.1056/nejmoa1709684':'https://i.imgur.com/OvzqLLp.png',
+    '10.1038/nature23879':'https://i.imgur.com/1UpBCgZ.png',
+    '10.1038/nphys4254':'https://i.imgur.com/YIh9ngF.png',
+    '10.1038/nclimate3382':'https://i.imgur.com/uQe4Hmj.png',
+    '10.1371/journal.pone.0183967':'https://i.imgur.com/6GRL9fe.png',
+    '10.1056/nejmra1608969':'https://i.imgur.com/pOjQfkC.png',
+    '10.1038/s41467-017-00109-2':'https://i.imgur.com/T86Ls2t.png',
+    '10.1038/s41559-017-0305-5':'https://i.imgur.com/CCqEXtd.png',
+    '10.3389/feduc.2017.00037':'https://i.imgur.com/BQgDZBc.png',
+    '10.1111/dar.12596':'https://i.imgur.com/z93iJAn.png',
+    '10.1038/s41562-017-0195-1':'https://i.imgur.com/QbZPG7z.png',
+    '10.1038/nn.4637':'https://i.imgur.com/yBkSSOD.png',
+    '10.1007/s00704-015-1597-5':'https://i.imgur.com/IFUxkcz.png',
+    '10.1007/s10899-009-9174-4':'https://i.imgur.com/pi4ych8.png',
+    '10.1038/ijo.2017.220':'https://i.imgur.com/SrhhXtA.png',
+    '10.1007/s10584-017-1978-0':'https://i.imgur.com/4tdNWou.png',
+    '10.1038/s41598-017-10675-6':'https://i.imgur.com/c2UqUBX.png',
+    '10.1002/ajpa.23308':'https://i.imgur.com/qh3UcfN.png',
+    '10.1038/s41598-017-09250-w':'https://i.imgur.com/UpD1XtU.png',
+    '10.1136/bmj.38705.470590.55':'https://i.imgur.com/Yeggq6e.png',
+    '10.3758/s13423-017-1343-3':'https://i.imgur.com/zMsWBPA.png',
+    '10.1016/s0140-6736(17)32336-x':'https://i.imgur.com/75SzNhQ.png',
+    '10.1038/s41598-017-12055-6':'https://i.imgur.com/yTyqbyV.png',
+    '10.3389/fnhum.2016.00511':'https://i.imgur.com/7XwVvrS.png',
+    '10.1136/bmj.311.7021.1668':'https://i.imgur.com/4npP5VA.png',
+    '10.1038/nature23651':'https://i.imgur.com/xH84ajU.png',
+    '10.1371/journal.pone.0181970':'https://i.imgur.com/rWussar.png',
+    '10.1088/1748-9326/aa815f':'https://i.imgur.com/un49AKi.png',
+    '10.1038/nature23681':'https://i.imgur.com/cUICqNA.png',
+    '10.1103/physrevlett.116.061102':'https://i.imgur.com/vKiKVCy.png',
+    '10.1016/j.joi.2017.08.007':'https://i.imgur.com/z6RP6TN.png',
+    '10.1103/physrevlett.119.110501':'https://i.imgur.com/1ZTBiUE.png',
+    '10.1038/nature23459':'https://i.imgur.com/gC7oDpy.png',
+    '10.1103/physreve.96.030101':'https://i.imgur.com/VAb0Wjj.png',
+    '10.1038/s41562-017-0082':'https://i.imgur.com/tVs9ONj.png',
+    '10.1136/bmjopen-2017-016942':'https://i.imgur.com/LJrFBtQ.png',
+    '10.1038/s41598-017-07948-5':'https://i.imgur.com/uGGxpWZ.png',
+    '10.1007/978-3-319-67389-9_7':'https://i.imgur.com/e8eVWrE.png',
+    '10.1038/ngeo3017':'https://i.imgur.com/1bEyVeX.png'
 }
 
 class WeeklyStats(db.Model):
@@ -233,7 +250,17 @@ class WeeklyStats(db.Model):
             "data sharing",
             "data management"
         ]
+        quantum_computing_words = [
+            "reproducibility",
+            "medical research",
+            "open access",
+            ]
         our_discipline = discipline_lookup[mendeley_discipline]
+
+        # use override if it is there
+        if self.id in discipline_overrides:
+            return discipline_overrides[self.id]
+
         if self.title:
             if our_discipline == "physics and astronomy":
                 if "gender" in self.title.lower():
