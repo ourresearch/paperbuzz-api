@@ -7,6 +7,7 @@ import os
 import re
 import datetime
 from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.orm import deferred
 from collections import defaultdict
 import requests
 
@@ -152,6 +153,7 @@ class WeeklyStats(db.Model):
     mendeley_api_raw = db.Column(JSONB)
     oadoi_api_raw = db.Column(JSONB)
     pubmed_api_raw = db.Column(JSONB)
+    altmetric_com_api_raw = deferred(db.Column(JSONB))
     sources = db.Column(JSONB)
     main_discipline = db.Column(db.Text)
     num_main_discipline = db.Column(db.Numeric)
@@ -198,8 +200,33 @@ class WeeklyStats(db.Model):
         except IndexError:
             return 0
 
-    # get abstracts
+    # get altmetric.com
     def run(self):
+        self.updated = datetime.datetime.utcnow()
+
+        try:
+            url = u"http://api.altmetric.com/v1/fetch/doi/{doi}?key={key}".format(
+                doi=self.id,
+                key=os.getenv("ALTMETRIC_KEY")
+            )
+            # print u"calling {}".format(url)
+
+            r = requests.get(url, timeout=10)  #timeout in seconds
+
+            if r.status_code == 200:
+                # we got a good status code, the DOI has metrics.
+                self.altmetric_com_api_raw = r.json()
+            else:
+                logger.info(u"got unexpected altmetric status_code code {}".format(r.status_code))
+
+        except requests.Timeout:
+            logger.info(u"got requests.Timeout")
+
+
+
+
+    # get abstracts
+    def run_get_abstracts(self):
         self.updated = datetime.datetime.utcnow()
 
         if not self.abstract:
