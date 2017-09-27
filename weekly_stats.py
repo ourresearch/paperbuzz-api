@@ -56,8 +56,7 @@ discipline_overrides = {
     "10.1038/549018a": "scholarly communication"
 }
 
-photos = {
-'10.1080/01436597.2017.1369037':'https://i.imgur.com/AZ8g46k.png',
+photos = {'10.1080/01436597.2017.1369037':'https://i.imgur.com/AZ8g46k.png',
 '10.1136/bmj.j4030':'https://i.imgur.com/xLLK0do.png',
 '10.1038/s41564-017-0012-7':'https://i.imgur.com/6InNONL.png',
 '10.1038/549133a':'https://i.imgur.com/cUQU6lO.png',
@@ -127,6 +126,9 @@ photos = {
 '10.17159/sajs.2017/20170010':'https://i.imgur.com/6I4b2Ku.png',
 '10.22269/170207':'https://i.imgur.com/zefb3z9.png',
 '10.1038/538446a':'https://i.imgur.com/E389P27.png',
+'10.1038/s41467-017-00371-4':'https://i.imgur.com/HNoiMYx.png',
+'10.2514/1.b36120':'https://i.imgur.com/72r34AL.png',
+'10.1007/s11109-016-9373-5':'https://i.imgur.com/j5MksbV.png',
 '10.1029/2005wr004820':'https://i.imgur.com/o7JWepN.png',
 '10.1038/srep21691':'https://i.imgur.com/B4KuMtm.png',
 '10.1371/journal.pone.0176896':'https://i.imgur.com/XdPu3Qf.png',
