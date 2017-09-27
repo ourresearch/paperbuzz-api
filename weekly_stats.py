@@ -56,7 +56,8 @@ discipline_overrides = {
     "10.1038/549018a": "scholarly communication"
 }
 
-photos = {'10.1080/01436597.2017.1369037':'https://i.imgur.com/AZ8g46k.png',
+photos = {
+    '10.1080/01436597.2017.1369037':'https://i.imgur.com/AZ8g46k.png',
 '10.1136/bmj.j4030':'https://i.imgur.com/xLLK0do.png',
 '10.1038/s41564-017-0012-7':'https://i.imgur.com/6InNONL.png',
 '10.1038/549133a':'https://i.imgur.com/cUQU6lO.png',
@@ -100,7 +101,7 @@ photos = {'10.1080/01436597.2017.1369037':'https://i.imgur.com/AZ8g46k.png',
 '10.1136/bmj.311.7021.1668':'https://i.imgur.com/4npP5VA.png',
 '10.1038/nature23651':'https://i.imgur.com/xH84ajU.png',
 '10.1371/journal.pone.0181970':'https://i.imgur.com/rWussar.png',
-'10.1088/1748-9326/aa815f':'https://i.imgur.com/wn9rUT5.png',
+'10.1088/1748-9326/aa815f':'https://i.imgur.com/f6TzWVi.png',
 '10.1038/nature23681':'https://i.imgur.com/cUICqNA.png',
 '10.1103/physrevlett.116.061102':'https://i.imgur.com/vKiKVCy.png',
 '10.1016/j.joi.2017.08.007':'https://i.imgur.com/z6RP6TN.png',
