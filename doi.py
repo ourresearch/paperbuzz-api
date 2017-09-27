@@ -127,7 +127,8 @@ class OaDoi(object):
 
     def get(self):
         r = requests.get(self.url)
-        self.data = r.json()
+        if r.status_code == 200:
+            self.data = r.json()
 
     def to_dict(self):
         self.data["oadoi_url"] = self.url
@@ -143,7 +144,8 @@ class CrossrefMetadata(object):
 
     def get(self):
         r = requests.get(self.url)
-        self.data = r.json()
+        if r.status_code == 200:
+            self.data = r.json()
 
     def to_dict(self):
         self.data["crossref_url"] = self.url
