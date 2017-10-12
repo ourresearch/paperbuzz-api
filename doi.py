@@ -18,21 +18,14 @@ class Doi(object):
         self.metadata = CrossrefMetadata(self.doi)
         self.open_access = OaDoi(self.doi)
         self.altmetrics = AltmetricsForDoi(self.doi)
-        self.unpaywall_views = UnpaywallViewsForDoi(self.doi)
 
     def get(self):
         self.metadata.get()
         self.open_access.get()
         self.altmetrics.get()
-        self.unpaywall_views.get()
 
     def altmetrics_dict_including_unpaywall_views(self):
         altmetrics_value = self.altmetrics.to_dict()
-        unpaywall_dict = {
-                "source_id": "unpaywall_views",
-                "events": self.unpaywall_views.to_dict()}
-        unpaywall_dict["events_count"] = len(unpaywall_dict["events"])
-        altmetrics_value["sources"] += [unpaywall_dict]
         return altmetrics_value
 
     def to_dict(self):
@@ -41,8 +34,7 @@ class Doi(object):
             "doi": self.doi,
             "altmetrics":  self.altmetrics_dict_including_unpaywall_views(),
             "metadata": self.metadata.to_dict(),
-            "open_access": self.open_access.to_dict(),
-            "unpaywall_views": self.unpaywall_views.to_dict()
+            "open_access": self.open_access.to_dict()
         }
         return ret
 
@@ -105,6 +97,7 @@ class AltmetricsForDoi(object):
 
 
 
+# currently unused, since we're moving Unpaywall to its own API
 class UnpaywallViewsForDoi(object):
     def __init__(self, doi):
         self.doi = doi
