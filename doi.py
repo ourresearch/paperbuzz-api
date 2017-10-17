@@ -30,9 +30,13 @@ class Doi(object):
 
     def to_dict(self):
 
+        altmetrics = self.altmetrics.to_dict()
+
+
         ret = {
             "doi": self.doi,
-            "altmetrics":  self.altmetrics_dict_including_unpaywall_views(),
+            "altmetrics_sources": altmetrics["sources"],
+            "crossref_event_data_url": altmetrics["crossref_event_data_url"],
             "metadata": self.metadata.to_dict(),
             "open_access": self.open_access.to_dict()
         }
