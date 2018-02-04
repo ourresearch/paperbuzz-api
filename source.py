@@ -19,6 +19,8 @@ class EventSource(object):
     def __init__(self, source_id):
         self.id = source_id
         self.events = []
+        self.events_count_by_year = []
+        self.events_count_by_month = []
         self.events_count_by_day = []
 
     def add_event(self, ced_event):
@@ -33,7 +35,9 @@ class EventSource(object):
 
         # recompute the count_by_day histogram
         occurred_ats = [e.occurred_at for e in self.events]
-        self.events_count_by_day = count_by_day(occurred_ats)
+        self.events_count_by_year = count_by(occurred_ats, "year")
+        self.events_count_by_month = count_by(occurred_ats, "month")
+        self.events_count_by_day = count_by(occurred_ats, "day")
 
 
     def to_dict(self):
@@ -41,6 +45,8 @@ class EventSource(object):
             "source_id": self.id,
             "events": [e.to_dict() for e in self.events],
             "events_count": len(self.events),
+            "events_count_by_year": self.events_count_by_year,
+            "events_count_by_month": self.events_count_by_month,
             "events_count_by_day": self.events_count_by_day
         }
 
@@ -112,14 +118,19 @@ class UnpaywallEventSource(EventSource):
 
 
 
-def count_by_day(timestamps):
+def count_by(timestamps, granularity="day"):
     """
     Make a frequency histogram based on a list of timestamps.
 
     :param timestamps: list of ISO 8601 timestamps
     :return: a list of dicts showing how frequently each timestamp appears
     """
-    trimmed_timestamps = [ts.split("T")[0] for ts in timestamps]
+    if granularity == "year":
+        trimmed_timestamps = [ts[0:4] for ts in timestamps]
+    elif granularity == "month":
+        trimmed_timestamps = [ts[0:7] for ts in timestamps]
+    else:
+        trimmed_timestamps = [ts[0:10] for ts in timestamps]
 
     hist_dict = defaultdict(int)
     for ts in trimmed_timestamps:

@@ -22,7 +22,7 @@ from doi import Doi
 
 
 
-# try it at https://paperbuzz-api.herokuapp.com/doi/10.1371/journal.pone.0000308
+# try it at https://api.paperbuzz.org/v0/doi/10.1371/journal.pone.0000308
 
 def json_dumper(obj):
     """
@@ -204,7 +204,7 @@ def get_event_endpoint(event_id):
 
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
+    port = int(os.environ.get("PORT", 5009))
     app.run(host='0.0.0.0', port=port, debug=True, threaded=True)
 
 
