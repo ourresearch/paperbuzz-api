@@ -24,7 +24,7 @@ class UnpaywallEvent(db.Model):
     doi = db.Column(db.Text)
     collected = db.Column(db.DateTime)
     updated = db.Column(db.DateTime)
-    ip = db.Column(db.Text)
+    ip = db.Column(db.Text, unique=True)
 
     insights_list = db.relationship(
         'IpInsights',
@@ -100,7 +100,8 @@ class CedEvent(db.Model):
     id = db.Column(db.Text, primary_key=True)
     updated = db.Column(db.DateTime)
     doi = db.Column(db.Text)
-    source_id = db.Column(db.Text)
+    source_id = db.Column(db.Text, db.ForeignKey('ced_source.id'))
+    source = db.relationship("CedSource")
     normalized_subj_id = db.Column(db.Text)
     occurred_at = db.Column(db.DateTime)
     uniqueness_key = db.Column(db.Text)
@@ -238,4 +239,11 @@ class WikipediaPageEvent(Event):
         return ret
 
 
+class CedSource(db.Model):
+    id = db.Column(db.Text, primary_key=True)
+    display_name = db.Column(db.Text)
+    icon_url = db.Column(db.Text)
+    events = db.relationship("CedEvent")
 
+    def __repr__(self):
+        return u"<CedSource ({} {} {})>".format(self.id, self.display_name, self.icon_url)
