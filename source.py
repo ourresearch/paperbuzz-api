@@ -16,8 +16,8 @@ def make_event_source(id):
 
 class EventSource(object):
 
-    def __init__(self, source_id):
-        self.id = source_id
+    def __init__(self, source):
+        self.source = source
         self.events = []
         self.events_count_by_year = []
         self.events_count_by_month = []
@@ -42,7 +42,8 @@ class EventSource(object):
 
     def to_dict(self):
         ret = {
-            "source_id": self.id,
+            "source_id": self.source.id,
+            "source": self.source.to_dict(),
             "events": [e.to_dict() for e in self.events],
             "events_count": len(self.events),
             "events_count_by_year": self.events_count_by_year,

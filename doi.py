@@ -54,12 +54,17 @@ class AltmetricsForDoi(object):
         self.sources = []
 
     def get(self):
-        ced_events = self._get_ced_events()
+        #     """
+        #     Handy test data:
+        #     10.2190/EC.43.3.f                       # no events
+        #     10.1371/journal.pone.0000308            # many events, incl lots of wiki
+        #     """
+        ced_events = CedEvent.query.filter(CedEvent.doi==self.doi).all()
         for ced_event in ced_events:
             self.add_event(ced_event)
 
     def add_event(self, ced_event):
-        source_id = ced_event["source_id"]
+        source_id = ced_event.api_raw["source_id"]
 
         # get the correct source for this event
         my_source = None
@@ -71,26 +76,12 @@ class AltmetricsForDoi(object):
         # we don't have this source for this DOI.
         # make it and add it to the list
         if my_source is None:
-            my_source = make_event_source(source_id)
+            my_source = make_event_source(ced_event.source)
             self.sources.append(my_source)
 
         # this source exists now for sure because we either found it or made it
         # add the event to the source.
-        my_source.add_event(ced_event)
-
-
-    def _get_ced_events(self):
-        """
-        Handy test data:
-        10.2190/EC.43.3.f                       # no events
-        10.1371/journal.pone.0000308            # many events, incl lots of wiki
-        """
-
-        event_objs = CedEvent.query.filter(CedEvent.doi==self.doi).all()
-        event_dicts = [event.api_raw for event in event_objs]
-        return event_dicts
-
-        return event_dicts
+        my_source.add_event(ced_event.api_raw)
 
     def to_dict(self):
         ret = {
