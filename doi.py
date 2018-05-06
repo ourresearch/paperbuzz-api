@@ -64,7 +64,7 @@ class AltmetricsForDoi(object):
             self.add_event(ced_event)
 
     def add_event(self, ced_event):
-        source_id = ced_event.api_raw["source_id"]
+        source_id = ced_event.source.id
 
         # get the correct source for this event
         my_source = None

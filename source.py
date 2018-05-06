@@ -17,6 +17,7 @@ def make_event_source(id):
 class EventSource(object):
 
     def __init__(self, source):
+        self.id = source.id
         self.source = source
         self.events = []
         self.events_count_by_year = []
