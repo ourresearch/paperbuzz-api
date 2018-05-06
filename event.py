@@ -170,6 +170,22 @@ class CedEvent(db.Model):
         return u"<CedEvent ({} {})>".format(self.source_id, self.id)
 
 
+class CedSource(db.Model):
+    id = db.Column(db.Text, primary_key=True)
+    display_name = db.Column(db.Text)
+    icon_url = db.Column(db.Text)
+    events = db.relationship("CedEvent")
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "display_name": self.display_name,
+            "icon_url": self.icon_url
+        }
+
+    def __repr__(self):
+        return u"<CedSource ({} {} {})>".format(self.id, self.display_name, self.icon_url)
+
 
 class Event(object):
     def __init__(self, ced_event):
@@ -237,13 +253,3 @@ class WikipediaPageEvent(Event):
         ret = super(WikipediaPageEvent, self).to_dict()
         ret["page_url"] = self._find_stem(self.subj_id)
         return ret
-
-
-class CedSource(db.Model):
-    id = db.Column(db.Text, primary_key=True)
-    display_name = db.Column(db.Text)
-    icon_url = db.Column(db.Text)
-    events = db.relationship("CedEvent")
-
-    def __repr__(self):
-        return u"<CedSource ({} {} {})>".format(self.id, self.display_name, self.icon_url)
