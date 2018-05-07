@@ -3,6 +3,7 @@ import dateutil.parser
 import shortuuid
 import hashlib
 
+from flask import url_for
 from app import db
 from sqlalchemy.dialects.postgresql import JSONB
 
@@ -180,7 +181,7 @@ class CedSource(db.Model):
         return {
             "id": self.id,
             "display_name": self.display_name,
-            "icon_url": self.icon_url
+            "icon_url": url_for('static', filename=self.icon_url, _external=True)
         }
 
     def __repr__(self):
