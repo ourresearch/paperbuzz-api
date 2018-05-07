@@ -36,6 +36,7 @@ class EventSource(object):
 
         # recompute the count_by_day histogram
         occurred_ats = [e.occurred_at for e in self.events]
+        self.first_event_date = occurred_ats[0][0:10]
         self.events_count_by_year = count_by(occurred_ats, "year")
         self.events_count_by_month = count_by(occurred_ats, "month")
         self.events_count_by_day = count_by(occurred_ats, "day")
@@ -47,6 +48,7 @@ class EventSource(object):
             "source": self.source.to_dict(),
             "events": [e.to_dict() for e in self.events],
             "events_count": len(self.events),
+            "first_event_date": self.first_event_date,
             "events_count_by_year": self.events_count_by_year,
             "events_count_by_month": self.events_count_by_month,
             "events_count_by_day": self.events_count_by_day
