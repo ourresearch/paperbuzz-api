@@ -138,46 +138,27 @@ class UpdateDbQueue():
         else:
             if not limit:
                 limit = 1000
-            ## based on http://dba.stackexchange.com/a/69497
-            if self.action_table == "base":
-                text_query_pattern = """WITH selected AS (
-                           SELECT *
-                           FROM   {table}
-                           WHERE  queue != '{queue_name}' and {where}
-                       LIMIT  {chunk}
-                       FOR UPDATE SKIP LOCKED
-                       )
-                    UPDATE {table} records_to_update
-                    SET    queue='{queue_name}'
-                    FROM   selected
-                    WHERE selected.id = records_to_update.id
-                    RETURNING records_to_update.id;"""
-                text_query = text_query_pattern.format(
-                    table=self.action_table,
-                    where=self.where,
-                    chunk=chunk,
-                    queue_name=self.queue_name)
-            else:
 
-                text_query_pattern = """WITH picked_from_queue AS (
-                           SELECT *
-                           FROM   {queue_table}
-                           WHERE  started is null
-                           ORDER BY rand
-                       LIMIT  {chunk}
-                       FOR UPDATE SKIP LOCKED
-                       )
-                    UPDATE {queue_table} doi_queue_rows_to_update
-                    SET    enqueued=TRUE, started=now(), dyno='{my_dyno_name}'
-                    FROM   picked_from_queue
-                    WHERE picked_from_queue.id = doi_queue_rows_to_update.id
-                    RETURNING doi_queue_rows_to_update.id;"""
-                text_query = text_query_pattern.format(
-                    chunk=chunk,
-                    my_dyno_name=my_dyno_name,
-                    queue_table=queue_table
-                )
-            logger.info(u"the queue query is:\n{}".format(text_query))
+        ## based on http://dba.stackexchange.com/a/69497
+        text_query_pattern = """WITH picked_from_queue AS (
+                   SELECT *
+                   FROM   {queue_table}
+                   WHERE  started is null
+                   ORDER BY rand
+               LIMIT  {chunk}
+               FOR UPDATE SKIP LOCKED
+               )
+            UPDATE {queue_table} doi_queue_rows_to_update
+            SET    enqueued=TRUE, started=now(), dyno='{my_dyno_name}'
+            FROM   picked_from_queue
+            WHERE picked_from_queue.id = doi_queue_rows_to_update.id
+            RETURNING doi_queue_rows_to_update.id;"""
+        text_query = text_query_pattern.format(
+            chunk=chunk,
+            my_dyno_name=my_dyno_name,
+            queue_table=queue_table
+        )
+        logger.info(u"the queue query is:\n{}".format(text_query))
 
         index = 0
 
