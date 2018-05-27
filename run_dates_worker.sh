@@ -3,7 +3,7 @@
 
 for (( i=1; i<=1; i++ ))
 do
-  COMMAND="python update.py DateRange.get_events --chunk=1 --limit=100000000 --name=hybrid-$DYNO:${i} "
+  COMMAND="python doi_queue.py --dates --run"
   echo $COMMAND
   $COMMAND&
 done
