@@ -50,7 +50,7 @@ class DateRange(db.Model):
 
     def get_events(self, rows=10000):
         headers={"Accept": "application/json", "User-Agent": "impactstory.org"}
-        base_url = "http://query.eventdata.crossref.org/events?rows={rows}&filter=from-collected-date:{first},until-collected-date:{first}"
+        base_url = "https://api.eventdata.crossref.org/v1/events?rows={rows}&filter=from-collected-date:{first},until-collected-date:{first}"
 
         cursor = None
         has_more_responses = True
