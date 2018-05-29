@@ -59,7 +59,7 @@ class AltmetricsForDoi(object):
         #     10.2190/EC.43.3.f                       # no events
         #     10.1371/journal.pone.0000308            # many events, incl lots of wiki
         #     """
-        ced_events = CedEvent.query.filter(CedEvent.doi==self.doi).all()
+        ced_events = CedEvent.query.filter(CedEvent.doi==self.doi).limit(2500).all()
         for ced_event in ced_events:
             self.add_event(ced_event)
 
