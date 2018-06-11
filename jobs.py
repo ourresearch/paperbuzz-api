@@ -174,9 +174,10 @@ class UpdateDbQueue():
                 # logger.info(u"finished get-new-ids query in {} seconds".format(elapsed(new_loop_start_time)))
 
             if not object_ids:
-                logger.info(u"sleeping for 5 seconds, then going again")
-                sleep(5)
-                continue
+                break
+                # logger.info(u"sleeping for 5 seconds, then going again")
+                # sleep(5)
+                # continue
 
             update_fn_args = [self.cls, self.method, object_ids]
 
