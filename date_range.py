@@ -4,6 +4,7 @@ from sqlalchemy import or_
 from sqlalchemy import sql
 from sqlalchemy import text
 from sqlalchemy import orm
+from sqlalchemy.exc import DataError, InvalidRequestError
 import requests
 from time import sleep
 from time import time
@@ -115,8 +116,12 @@ class DateRange(db.Model):
                     logger.info(u"missing key for event, skipping. {}".format(api_raw))
                     continue
 
+                if api_raw["occurred_at"] == "-0001-11-30T00:00:00Z":
+                    logger.info(u"bad date format in occurred_at field, skipping. {}".format(api_raw))
+                    continue
+
                 if not CedEvent.query.filter(CedEvent.uniqueness_key==ced_obj.uniqueness_key).first() and \
-                                ced_obj.uniqueness_key not in [obj.uniqueness_key for obj in to_commit]:
+                            ced_obj.uniqueness_key not in [obj.uniqueness_key for obj in to_commit]:
                     db.session.merge(ced_obj)
                     to_commit.append(ced_obj)
                     num_so_far += 1
