@@ -116,7 +116,7 @@ class DateRange(db.Model):
                     logger.info(u"missing key for event, skipping. {}".format(api_raw))
                     continue
 
-                bad_dates = ["-0001-11-30T00:00:00Z", "-0001-11-28T00:00:00Z"]
+                bad_dates = ["0000-01-01T00:00:00Z", "-0001-11-30T00:00:00Z", "-0001-11-28T00:00:00Z"]
                 if api_raw["occurred_at"] in bad_dates:
                     logger.info(u"bad date format in occurred_at field, skipping. {}".format(api_raw))
                     continue
