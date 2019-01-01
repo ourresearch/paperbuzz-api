@@ -1,5 +1,4 @@
 from datetime import datetime
-import json
 import pytest
 from views import app, db
 from event import CedEvent, CedSource
