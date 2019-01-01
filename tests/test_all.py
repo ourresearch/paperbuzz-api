@@ -3,6 +3,9 @@ import pytest
 from views import app, db
 from event import CedEvent, CedSource
 
+# to run these tests, create local database named paperbuzz_test
+# then run with $ pytest
+
 @pytest.fixture
 def client():
     app.config['TESTING'] = True
