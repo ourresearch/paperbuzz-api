@@ -3,6 +3,9 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_compress import Compress
 from flask_debugtoolbar import DebugToolbarExtension
 
+import sentry_sdk
+from sentry_sdk.integrations.flask import FlaskIntegration
+
 from sqlalchemy import exc
 from sqlalchemy import event
 from sqlalchemy import func
@@ -42,6 +45,12 @@ for a_library in libraries_to_mum:
     the_logger.propagate = True
 
 requests.packages.urllib3.disable_warnings()
+
+# error reporting with sentry
+sentry_sdk.init(
+    dsn=os.environ.get('SENTRY_DSN'),
+    integrations=[FlaskIntegration()]
+)
 
 app = Flask(__name__)
 # app.debug = True
