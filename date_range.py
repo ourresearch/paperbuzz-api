@@ -128,7 +128,7 @@ class DateRange(db.Model):
                         to_commit.append(ced_obj)
                         num_so_far += 1
                     except IntegrityError:
-                        logger.error(u"missing source. {}".format(api_raw))
+                        logger.error(u"missing source. {}".format(ced_obj.source_id))
                         raise
                 else:
                     # logger.info(u"not committing, is dup")
