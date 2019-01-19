@@ -4,7 +4,7 @@ from sqlalchemy import or_
 from sqlalchemy import sql
 from sqlalchemy import text
 from sqlalchemy import orm
-from sqlalchemy.exc import DataError, InvalidRequestError
+from sqlalchemy.exc import DataError, InvalidRequestError, IntegrityError
 import requests
 from time import sleep
 from time import time
@@ -123,9 +123,13 @@ class DateRange(db.Model):
 
                 if not CedEvent.query.filter(CedEvent.uniqueness_key==ced_obj.uniqueness_key).first() and \
                             ced_obj.uniqueness_key not in [obj.uniqueness_key for obj in to_commit]:
-                    db.session.merge(ced_obj)
-                    to_commit.append(ced_obj)
-                    num_so_far += 1
+                    try:
+                        db.session.merge(ced_obj)
+                        to_commit.append(ced_obj)
+                        num_so_far += 1
+                    except IntegrityError:
+                        logger.error(u"missing source. {}".format(api_raw))
+                        raise
                 else:
                     # logger.info(u"not committing, is dup")
                     pass
