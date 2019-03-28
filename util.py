@@ -477,3 +477,7 @@ def get_sql_answers(db, q):
     if not rows:
         return []
     return [row[0] for row in rows]
+
+def get_multiple_authors(authors):
+    parsed_authors = [author['name'] for author in authors]
+    return ', '.join(set(parsed_authors))

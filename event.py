@@ -6,6 +6,8 @@ import hashlib
 from flask import url_for
 from app import db
 from sqlalchemy.dialects.postgresql import JSONB
+from util import get_multiple_authors
+
 
 class IpInsights(db.Model):
     id = db.Column(db.Text, primary_key=True)
@@ -205,6 +207,8 @@ class Event(object):
     def to_dict(self):
         try:
             author_url = self.ced_event["subj"]["author"]["url"]
+        except TypeError:
+            author_url = get_multiple_authors(self.ced_event["subj"]["author"])
         except KeyError:
             author_url = None
 
