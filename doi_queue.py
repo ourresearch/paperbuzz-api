@@ -8,6 +8,7 @@ from subprocess import call
 import heroku3
 from pprint import pprint
 import datetime
+import sentry_sdk
 
 
 from app import db
@@ -25,6 +26,8 @@ from app import HEROKU_APP_NAME
 
 # to get the clarivate dois in
 # date; grep "WOS:" DOI_Output.txt | sed 's:\\:\\\\:g' | psql postgres://user:pass@host:5432/dbname?ssl=true -c "copy dois_from_wos (wos_id) from STDIN;"; date;
+sentry_sdk.init(os.environ.get('SENTRY_DSN'))
+
 
 def monitor_till_done(job_type):
     logger.info(u"collecting data. will have some stats soon...")
