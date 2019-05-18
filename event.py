@@ -6,7 +6,7 @@ import hashlib
 from flask import url_for
 from app import db
 from sqlalchemy.dialects.postgresql import JSONB
-from util import get_multiple_authors
+from util import get_multiple_authors, validate_author_url, validate_subject_url
 
 
 class IpInsights(db.Model):
@@ -203,23 +203,21 @@ class Event(object):
     def occurred_at(self):
         return self.ced_event["occurred_at"]
 
-
     def to_dict(self):
         try:
             author_url = self.ced_event["subj"]["author"]["url"]
+            author_url = validate_author_url(author_url)
         except TypeError:
             author_url = get_multiple_authors(self.ced_event["subj"]["author"])
         except KeyError:
             author_url = None
 
-
-        # return self.ced_event
+        subject_url = validate_subject_url(author_url, self.ced_event["subj_id"])
 
         return {
-            # "full": self.ced_event,
             "author": author_url,
             "occurred_at": self.ced_event["occurred_at"],
-            "url": self.ced_event["subj_id"]
+            "url": subject_url
         }
 
 

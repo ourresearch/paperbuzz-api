@@ -481,3 +481,22 @@ def get_sql_answers(db, q):
 def get_multiple_authors(authors):
     parsed_authors = [author['name'] for author in authors]
     return ', '.join(set(parsed_authors))
+
+def find_or_return_empty(pattern, item):
+    result = re.search(pattern, item)
+    return result.group() if result else ""
+
+def validate_author_url(author_url):
+    if author_url.startswith('twitter://'):
+        screen_name = find_or_return_empty('screen_name=([A-Za-z0-9_]{1,15}$)', author_url)
+        return 'http://www.twitter.com/{}'.format(screen_name)
+    else:
+        return author_url
+
+def validate_subject_url(author_url, subject_url):
+    if subject_url.startswith('twitter://'):
+        screen_name = find_or_return_empty('twitter.com\/([A-Za-z0-9_]{1,15}$)', author_url)
+        status_id = find_or_return_empty('id=(\d+$)', subject_url)
+        return 'http://www.twitter.com/{}/statuses/{}'.format(screen_name, status_id)
+    else:
+        return subject_url
