@@ -73,7 +73,7 @@ class DateRange(db.Model):
             while not resp and call_tries < 25:
                 try:
                     s = requests.Session()
-                    resp = s.get(url, headers=headers, timeout=20)
+                    resp = s.get(url, headers=headers, timeout=25)
                 except requests.exceptions.ReadTimeout:
                     logger.info(u"timed out, trying again after sleeping")
                     sleep(2)
