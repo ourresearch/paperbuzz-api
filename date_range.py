@@ -1,27 +1,13 @@
-from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.orm import deferred
-from sqlalchemy import or_
-from sqlalchemy import sql
-from sqlalchemy import text
-from sqlalchemy import orm
-from sqlalchemy.exc import DataError, InvalidRequestError, IntegrityError
-import requests
-from time import sleep
-from time import time
 import datetime
-import shortuuid
+from time import sleep, time
 from urllib import quote
-import os
-import re
 
-from app import logger
-from app import db
+import requests
+from sqlalchemy.exc import IntegrityError
+
+from app import db, logger
 from event import CedEvent
-from util import elapsed
-from util import safe_commit
-from util import clean_doi
-from util import NoDoiException
-
+from util import clean_doi, elapsed, NoDoiException, run_sql, safe_commit
 
 # insert into doi_queue_paperbuzz_dates (select s as id, random() as rand, false as enqueued, null::timestamp as finished, null::timestamp as started, null::text as dyno FROM generate_series
 #         ( '2017-02-01'::timestamp
@@ -70,16 +56,17 @@ class DateRange(db.Model):
 
             call_tries = 0
             resp = None
-            while not resp and call_tries < 25:
+            while not resp and call_tries < 5:
                 try:
                     s = requests.Session()
-                    resp = s.get(url, headers=headers, timeout=25)
-                except requests.exceptions.ReadTimeout:
-                    logger.info(u"timed out, trying again after sleeping")
+                    resp = s.get(url, headers=headers, timeout=60)
+                except (requests.exceptions.ReadTimeout, requests.exceptions.ConnectionError):
+                    logger.info(u"timed out or connection error, trying again after sleeping")
+                    call_tries += 1
                     sleep(2)
 
             if not resp:
-               raise(requests.exceptions.ReadTimeout)
+                self.process_failed_import()
 
             logger.info(u"getting CED data took {} seconds".format(elapsed(start_time, 2)))
             if resp.status_code != 200:
@@ -149,12 +136,11 @@ class DateRange(db.Model):
 
         return num_so_far
 
+    def process_failed_import(self):
+        run_sql(db, """update doi_queue_paperbuzz_dates 
+                                       set enqueued=NULL, finished=NULL, started=NULL, dyno=NULL 
+                                       where id = '{id_date}'""".format(id_date=self.id))
+        raise requests.exceptions.ReadTimeout
 
     def __repr__(self):
         return u"<DateRange (starts: {})>".format(self.id)
-
-
-
-
-
-
