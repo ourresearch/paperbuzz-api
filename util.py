@@ -483,7 +483,7 @@ def get_multiple_authors(authors):
     return ', '.join(set(parsed_authors))
 
 def validate_author_url(author_url):
-    if author_url.startswith('twitter://'):
+    if author_url and author_url.startswith('twitter://'):
         screen_name = re.findall('screen_name=([A-Za-z0-9_]{1,15}$)', author_url)[0]
         return 'http://www.twitter.com/{}'.format(screen_name)
     else:
