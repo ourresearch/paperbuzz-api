@@ -38,7 +38,7 @@ requests_cache.install_cache(
     'my_requests_cache',
     backend='redis',
     connection=redis_conn,
-    expire_after=60*60*24*30
+    expire_after=60*60*6  # 6 hours
 )
 requests_cache.core.remove_expired_responses()
 
