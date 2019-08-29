@@ -90,3 +90,4 @@ README_cache
 
 # raw doaj files (added by heather)
 data/doaj_20*.csv
+dump.rdb

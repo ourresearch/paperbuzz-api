@@ -15,7 +15,9 @@ from sqlalchemy.pool import Pool
 import logging
 import sys
 import os
+import redis
 import requests
+import requests_cache
 from util import safe_commit
 
 HEROKU_APP_NAME = "paperbuzz-api"
@@ -28,6 +30,17 @@ logging.basicConfig(
     format='%(name)s - %(message)s'
 )
 logger = logging.getLogger("paperbuzz")
+
+# requests caching with redis
+redis_url = os.getenv('REDIS_URL', 'redis://localhost:6379')
+redis_conn = redis.from_url(redis_url)
+requests_cache.install_cache(
+    'my_requests_cache',
+    backend='redis',
+    connection=redis_conn,
+    expire_after=60*60*24*30
+)
+requests_cache.core.remove_expired_responses()
 
 libraries_to_mum = [
     "requests.packages.urllib3",
