@@ -246,7 +246,7 @@ class WeeklyStats(db.Model):
     def run_other_things(self):
         self.updated = datetime.datetime.utcnow()
 
-        url = "http://api.oadoi.org/v2/{}?email=paperbuzz@impactstory.org".format(self.id)
+        url = "http://api.oadoi.org/v2/{}?email=team@ourresearch.org".format(self.id)
         r = requests.get(url)
         self.oadoi_api_raw = r.json()
         if self.oadoi_api_raw and "is_oa" in self.oadoi_api_raw:
@@ -264,7 +264,7 @@ class WeeklyStats(db.Model):
         if self.mendeley_api_raw and self.mendeley_api_raw.get("abstract", None):
             self.abstract = self.mendeley_api_raw.get("abstract", None)
         else:
-            url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term={}[doi]&tool=paperbuzz&email=team@impactstory.org&retmode=json".format(self.id)
+            url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term={}[doi]&tool=paperbuzz&email=team@ourresearch.org&retmode=json".format(self.id)
             print url
             r = requests.get(url)
             try:
@@ -273,13 +273,13 @@ class WeeklyStats(db.Model):
                 pmid = None
 
             if pmid:
-                url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id={}&tool=paperbuzz&email=team@impactstory.org".format(pmid)
+                url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id={}&tool=paperbuzz&email=team@ourresearch.org".format(pmid)
                 print url
                 r = requests.get(url)
                 abstract_hits = re.findall(u'abstract.*?"(.*?)"', r.text.replace("\n", ""), re.MULTILINE)
                 if abstract_hits:
                     self.abstract = abstract_hits[0]
-                url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id={}&retmode=json&tool=paperbuzz&email=team@impactstory.org".format(pmid)
+                url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id={}&retmode=json&tool=paperbuzz&email=team@ourresearch.org".format(pmid)
                 print url
                 r = requests.get(url)
                 self.pubmed_api_raw = r.json()["result"][pmid]

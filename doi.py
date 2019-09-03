@@ -114,7 +114,7 @@ class OaDoi(object):
         self.data = {}
 
     def get(self):
-        r = requests.get(self.url + '?email=paperbuzz@impactstory.org', timeout=20)
+        r = requests.get(self.url + '?email=team@ourresearch.org', timeout=20)
         if r.status_code == 200:
             self.data = r.json()
 
