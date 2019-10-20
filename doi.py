@@ -1,18 +1,10 @@
-import datetime
-import shortuuid
-import hashlib
 import requests
-from sqlalchemy.dialects.postgresql import JSONB
 
-from app import db
-from source import make_event_source
 from event import CedEvent
-from event import UnpaywallEvent
-
+from source import make_event_source
 
 
 class Doi(object):
-
     def __init__(self, doi):
         self.doi = doi
         self.metadata = CrossrefMetadata(self.doi)
@@ -29,9 +21,7 @@ class Doi(object):
         return altmetrics_value
 
     def to_dict(self):
-
         altmetrics = self.altmetrics.to_dict()
-
 
         ret = {
             "doi": self.doi,
@@ -41,7 +31,6 @@ class Doi(object):
             "open_access": self.open_access.to_dict()
         }
         return ret
-
 
 
 class AltmetricsForDoi(object):
@@ -91,22 +80,6 @@ class AltmetricsForDoi(object):
         return ret
 
 
-
-# currently unused, since we're moving Unpaywall to its own API
-class UnpaywallViewsForDoi(object):
-    def __init__(self, doi):
-        self.doi = doi
-
-    def get(self):
-        event_objs = UnpaywallEvent.query.filter(UnpaywallEvent.doi==self.doi).all()
-        event_dicts = [event.api_dict() for event in event_objs]
-        return event_dicts
-
-    def to_dict(self):
-        ret = self.get()
-        return ret
-
-
 class OaDoi(object):
     def __init__(self, doi):
         self.doi = doi
@@ -123,19 +96,17 @@ class OaDoi(object):
         return self.data
 
 
-
 class CrossrefMetadata(object):
     def __init__(self, doi):
         self.doi = doi
-        self.url = u"https://api.crossref.org/works/{}/transform/application/vnd.citationstyles.csl+json".format(doi)
+        self.url = u"https://api.crossref.org/works/{}/".format(doi)
         self.data = {}
 
     def get(self):
         r = requests.get(self.url, timeout=20)
         if r.status_code == 200:
-            self.data = r.json()
+            self.data = r.json()['message']
 
     def to_dict(self):
         self.data["crossref_url"] = self.url
         return self.data
-
