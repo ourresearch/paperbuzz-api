@@ -13,7 +13,7 @@ def old_dates_update():
     date_sql = """
         SELECT * FROM doi_queue_paperbuzz_dates 
         WHERE id > now() - interval '3 years' 
-        ORDER BY finished ASC NULLS LAST LIMIT 15;
+        ORDER BY finished ASC NULLS FIRST LIMIT 15;
     """
     dates = db.session.execute(date_sql)
 
