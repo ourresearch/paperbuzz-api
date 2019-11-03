@@ -127,7 +127,7 @@ class OaDoi(object):
 class CrossrefMetadata(object):
     def __init__(self, doi):
         self.doi = doi
-        self.url = u"https://api.crossref.org/works/{}/transform/application/vnd.citationstyles.csl+json".format(doi)
+        self.url = u"https://api.crossref.org/works/{}/".format(doi)
         self.data = {}
 
     def get(self):
@@ -139,7 +139,7 @@ class CrossrefMetadata(object):
         else:
             r = requests.get(self.url, timeout=20)
             if r.status_code == 200:
-                self.data = r.json()
+                self.data = r.json()['message']
                 self.save_to_cache()
 
     def to_dict(self):
