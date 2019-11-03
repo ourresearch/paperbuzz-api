@@ -3,7 +3,6 @@ from time import sleep, time
 from urllib import quote
 
 import requests
-import requests_cache
 from sqlalchemy.exc import IntegrityError
 
 from app import db, logger
@@ -59,9 +58,8 @@ class DateRange(db.Model):
             resp = None
             while not resp and call_tries < 5:
                 try:
-                    with requests_cache.disabled():
-                        s = requests.Session()
-                        resp = s.get(url, headers=headers, timeout=60)
+                    s = requests.Session()
+                    resp = s.get(url, headers=headers, timeout=60)
                 except (requests.exceptions.ReadTimeout, requests.exceptions.ConnectionError):
                     logger.info(u"timed out or connection error, trying again after sleeping")
                     call_tries += 1

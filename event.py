@@ -256,3 +256,14 @@ class WikipediaPageEvent(Event):
         ret = super(WikipediaPageEvent, self).to_dict()
         ret["page_url"] = self._find_stem(self.subj_id)
         return ret
+
+
+class MetadataCache(db.Model):
+    id = db.Column(db.Text, primary_key=True)
+    api_raw = db.Column(JSONB)
+    updated = db.Column(db.DateTime)
+
+    def __init__(self, id, api_raw):
+        self.id = id
+        self.api_raw = api_raw
+        self.updated = datetime.datetime.utcnow()

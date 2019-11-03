@@ -1,7 +1,9 @@
+import datetime
 import requests
 
-from event import CedEvent
+from app import db
 from source import make_event_source
+from event import CedEvent, MetadataCache
 
 
 class Doi(object):
@@ -106,7 +108,28 @@ class CrossrefMetadata(object):
         r = requests.get(self.url, timeout=20)
         if r.status_code == 200:
             self.data = r.json()['message']
+        expired = datetime.datetime.today() - datetime.timedelta(6*365/12)
+        cached_item = MetadataCache.query.get(self.doi)
+
+        if cached_item and cached_item.updated > expired:
+            self.data = cached_item.api_raw
+        else:
+            r = requests.get(self.url, timeout=20)
+            if r.status_code == 200:
+                self.data = r.json()['message']
+                self.save_to_cache()
 
     def to_dict(self):
         self.data["crossref_url"] = self.url
         return self.data
+
+    def save_to_cache(self):
+        existing_cache_item = MetadataCache.query.get(self.doi)
+        if existing_cache_item:
+            existing_cache_item.updated = datetime.datetime.utcnow()
+            existing_cache_item.api_raw = self.data
+            db.session.commit()
+        else:
+            new_cache_item = MetadataCache(id=self.doi, api_raw=self.data)
+            db.session.add(new_cache_item)
+            db.session.commit()
