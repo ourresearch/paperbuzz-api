@@ -105,11 +105,8 @@ class CrossrefMetadata(object):
         self.data = {}
 
     def get(self):
-        r = requests.get(self.url, timeout=20)
-        if r.status_code == 200:
-            self.data = r.json()
-        expired = datetime.datetime.today() - datetime.timedelta(6*365/12)
         cached_item = MetadataCache.query.get(self.doi)
+        expired = datetime.datetime.today() - datetime.timedelta(6*365/12)
 
         if cached_item and cached_item.updated > expired:
             self.data = cached_item.api_raw
