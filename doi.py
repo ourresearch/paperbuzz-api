@@ -37,7 +37,7 @@ class Doi(object):
 
 class AltmetricsForDoi(object):
     def __init__(self, doi):
-        self.doi = doi
+        self.doi = doi.encode('utf-8')
         self.ced_url = "https://api.eventdata.crossref.org/v1/events?rows=10000&filter=from-collected-date:1990-01-01,until-collected-date:2099-01-01,obj-id:{}".format(
             self.doi
         )
