@@ -14,7 +14,6 @@ import requests
 from app import db
 from app import logger
 from doi import Doi
-from event import UnpaywallEvent
 from event import CedEvent
 from util import remove_punctuation
 from util import clean_html
@@ -179,12 +178,6 @@ class WeeklyStats(db.Model):
         ced_events_this_week = [e for e in ced_events if e.week==self.week]
         for e in ced_events_this_week:
             event_count_dict[e.source_id] += 1
-
-        unpaywall_events = UnpaywallEvent.query.filter(UnpaywallEvent.doi==self.id).all()
-        unpaywall_events_this_week = [e for e in unpaywall_events if e.week==self.week]
-        event_count_dict["unpaywall_views"] = len(unpaywall_events_this_week)
-        event_count_dict["unpaywall_views_academic"] = len([e for e in unpaywall_events_this_week if e.is_academic_location])
-        event_count_dict["unpaywall_views_nonacademic"] = len([e for e in unpaywall_events_this_week if not e.is_academic_location])
 
         sources = []
         for (source_id, num) in event_count_dict.items():
