@@ -1,17 +1,13 @@
 from time import time
-from time import sleep
 import argparse
 import os
 
-from sqlalchemy.dialects import postgresql
 from sqlalchemy import orm
 from sqlalchemy import text
-from sqlalchemy import sql
 
 from app import db
 from app import logger
 from util import elapsed
-from util import chunks
 from util import safe_commit
 from util import run_sql
 
@@ -92,8 +88,7 @@ def update_fn(cls, method, obj_id_list, shortcut_data=None, index=1):
     return None  # important for if we use this on RQ
 
 
-
-class UpdateRegistry():
+class UpdateRegistry:
     def __init__(self):
         self.updates = {}
 
@@ -103,14 +98,15 @@ class UpdateRegistry():
     def get(self, update_name):
         return self.updates[update_name]
 
+
 update_registry = UpdateRegistry()
 
 
-class UpdateDbQueue():
+class UpdateDbQueue:
     def __init__(self, **kwargs):
         self.job = kwargs["job"]
         self.method = self.job
-        self.cls = self.job.__self__.__class__
+        self.cls = self.job.__class__
         self.chunk = kwargs.get("chunk", 10)
         self.shortcut_fn = kwargs.get("shortcut_fn", None)
         self.shortcut_fn_per_chunk = kwargs.get("shortcut_fn_per_chunk", None)
@@ -118,7 +114,6 @@ class UpdateDbQueue():
         self.action_table = kwargs.get("action_table", None)
         self.where = kwargs.get("where", None)
         self.queue_name = kwargs.get("queue_name", None)
-
 
     def run(self, **kwargs):
         single_obj_id = kwargs.get("id", None)
@@ -221,8 +216,6 @@ class UpdateDbQueue():
                 except ZeroDivisionError:
                     # logger.info(u"not printing status because divide by zero")
                     logger.info("."),
-
-
 
 
 def main(fn, optional_args=None):
