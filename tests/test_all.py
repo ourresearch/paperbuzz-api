@@ -74,7 +74,7 @@ def test_api_doi_events(client, init_database):
     response = client.get('/v0/doi/10.1039/c5ce01901j')
     json_data = response.get_json()
     assert response.status_code == 200
-    assert json_data['doi'] == b'10.1039/c5ce01901j'
+    assert json_data['doi'] == '10.1039/c5ce01901j'
     assert json_data['altmetrics_sources'][0]['events_count'] == 2
 
 
