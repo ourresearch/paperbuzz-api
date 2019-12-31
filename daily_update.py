@@ -13,7 +13,7 @@ def daily_update():
     existing_record = db.session.execute('select * from doi_queue_paperbuzz_dates where id = :val', {'val': ts})
 
     if existing_record.first() is None:
-        q = u"""insert into doi_queue_paperbuzz_dates (select s as id, random() as rand, 
+        q = """insert into doi_queue_paperbuzz_dates (select s as id, random() as rand, 
                 false as enqueued, null::timestamp as finished, null::timestamp 
                 as started, null::text as dyno FROM generate_series
                 ('{start}'::timestamp, '{end}'::timestamp, '1 day'::interval) s);""".format(

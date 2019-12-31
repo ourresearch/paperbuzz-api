@@ -39,7 +39,7 @@ def json_resp(thing):
     json_str = json.dumps(thing, sort_keys=True, default=json_dumper, indent=4)
 
     if request.path.endswith(".json") and (os.getenv("FLASK_DEBUG", False) == "True"):
-        print u"rendering output through debug_api.html template"
+        print("rendering output through debug_api.html template")
         resp = make_response(render_template(
             'debug_api.html',
             data=json_str))
@@ -175,11 +175,11 @@ def get_hot_week_endpoint(week_string):
 
                 # dedup the papers, saving the most restrictive
                 if paper.id in response_dict:
-                    if len(paper_dict["filters"].keys()) > (response_dict[paper.id]["filters"].keys()):
+                    if len(list(paper_dict["filters"].keys())) > (list(response_dict[paper.id]["filters"].keys())):
                         response_dict[paper.id] = paper_dict
                 else:
                     response_dict[paper.id] = paper_dict
-        response = response_dict.values()
+        response = list(response_dict.values())
         response = sorted(response, key=lambda k: k['sort_score'], reverse=True)
 
     return jsonify({"list": response})

@@ -30,13 +30,13 @@ sentry_sdk.init(os.environ.get('SENTRY_DSN'))
 
 
 def monitor_till_done(job_type):
-    logger.info(u"collecting data. will have some stats soon...")
-    logger.info(u"\n\n")
+    logger.info("collecting data. will have some stats soon...")
+    logger.info("\n\n")
 
     num_total = number_total_on_queue(job_type)
-    print "num_total", num_total
+    print("num_total", num_total)
     num_unfinished = number_unfinished(job_type)
-    print "num_unfinished", num_unfinished
+    print("num_unfinished", num_unfinished)
 
     loop_thresholds = {"short": 30, "long": 10*60, "medium": 60}
     loop_unfinished = {"short": num_unfinished, "long": num_unfinished}
@@ -52,8 +52,8 @@ def monitor_till_done(job_type):
                     num_finished_this_loop = loop_unfinished[loop] - num_unfinished_now
                     loop_unfinished[loop] = num_unfinished_now
                     if loop=="long":
-                        logger.info(u"\n****"),
-                    logger.info(u"   {} finished in the last {} seconds, {} of {} are now finished ({}%).  ".format(
+                        logger.info("\n****"),
+                    logger.info("   {} finished in the last {} seconds, {} of {} are now finished ({}%).  ".format(
                         num_finished_this_loop, loop_thresholds[loop],
                         num_total - num_unfinished_now,
                         num_total,
@@ -61,15 +61,15 @@ def monitor_till_done(job_type):
                     )),  # comma so the next part will stay on the same line
                     if num_finished_this_loop:
                         minutes_left = float(num_unfinished_now) / num_finished_this_loop * loop_thresholds[loop] / 60
-                        logger.info(u"{} estimate: done in {} mins, which is {} hours".format(
+                        logger.info("{} estimate: done in {} mins, which is {} hours".format(
                             loop, round(minutes_left, 1), round(minutes_left/60, 1)))
                     else:
-                        print
+                        print()
                     loop_start_time[loop] = time()
                     # print_idle_dynos(job_type)
-        print".",
+        print(".", end=' ')
         sleep(3)
-    logger.info(u"everything is done.  turning off all the dynos")
+    logger.info("everything is done.  turning off all the dynos")
     scale_dyno(0, job_type)
 
 
@@ -89,11 +89,11 @@ def print_status(job_type):
     num_dois = number_total_on_queue(job_type)
     num_waiting = number_waiting_on_queue(job_type)
     if num_dois:
-        logger.info(u"There are {} dois in the queue, of which {} ({}%) are waiting to run".format(
+        logger.info("There are {} dois in the queue, of which {} ({}%) are waiting to run".format(
             num_dois, num_waiting, int(100*float(num_waiting)/num_dois)))
 
 def kick(job_type):
-    q = u"""update {table_name} set started=null, finished=null
+    q = """update {table_name} set started=null, finished=null
           where finished is null
           and id in (select id from {table_name} where started is not null)""".format(
           table_name=table_name(job_type))
@@ -101,7 +101,7 @@ def kick(job_type):
     print_status(job_type)
 
 def reset_enqueued(job_type):
-    q = u"update {} set started=null, finished=null".format(table_name(job_type))
+    q = "update {} set started=null, finished=null".format(table_name(job_type))
     run_sql(db, q)
 
 def truncate(job_type):
@@ -146,20 +146,20 @@ def print_idle_dynos(job_type):
     dynos_still_working = get_sql_answers(db, "select dyno from {} where started is not null and finished is null".format(table_name(job_type)))
     dynos_still_working_names = [n for n in dynos_still_working]
 
-    logger.info(u"dynos still running: {}".format([d.name for d in running_dynos if d.name in dynos_still_working_names]))
+    logger.info("dynos still running: {}".format([d.name for d in running_dynos if d.name in dynos_still_working_names]))
     # logger.info(u"dynos stopped:", [d.name for d in running_dynos if d.name not in dynos_still_working_names])
     # kill_list = [d.kill() for d in running_dynos if d.name not in dynos_still_working_names]
 
 def scale_dyno(n, job_type):
-    logger.info(u"starting with {} dynos".format(num_dynos(job_type)))
-    logger.info(u"setting to {} dynos".format(n))
+    logger.info("starting with {} dynos".format(num_dynos(job_type)))
+    logger.info("setting to {} dynos".format(n))
     heroku_conn = heroku3.from_key(os.getenv("HEROKU_API_KEY"))
     app = heroku_conn.apps()[HEROKU_APP_NAME]
     app.process_formation()[process_name(job_type)].scale(n)
 
-    logger.info(u"sleeping for 2 seconds while it kicks in")
+    logger.info("sleeping for 2 seconds while it kicks in")
     sleep(2)
-    logger.info(u"verifying: now at {} dynos".format(num_dynos(job_type)))
+    logger.info("verifying: now at {} dynos".format(num_dynos(job_type)))
 
 
 
@@ -179,12 +179,12 @@ def add_dois_to_queue_from_file(filename, job_type):
     q = "update {} set id=lower(id)".format(table_name(job_type))
     run_sql(db, q)
 
-    logger.info(u"add_dois_to_queue_from_file done in {} seconds".format(elapsed(start, 1)))
+    logger.info("add_dois_to_queue_from_file done in {} seconds".format(elapsed(start, 1)))
     print_status(job_type)
 
 
 def add_dois_to_queue_from_query(where, job_type):
-    logger.info(u"adding all dois, this may take a while")
+    logger.info("adding all dois, this may take a while")
     start = time()
 
     # run_sql(db, "drop table {} cascade".format(table_name(job_type)))
@@ -241,7 +241,7 @@ def add_dois_to_queue_from_query(where, job_type):
     run_sql(db, command)
 
     # they are already lowercased
-    logger.info(u"add_dois_to_queue_from_query done in {} seconds".format(elapsed(start, 1)))
+    logger.info("add_dois_to_queue_from_query done in {} seconds".format(elapsed(start, 1)))
     print_status(job_type)
 
 
@@ -258,7 +258,7 @@ def run(parsed_args, job_type):
 
     update.run(**vars(parsed_args))
 
-    logger.info(u"finished update in {} seconds".format(elapsed(start)))
+    logger.info("finished update in {} seconds".format(elapsed(start)))
 
     if job_type in ("normal", "hybrid"):
         from event import CedEvent
@@ -317,7 +317,7 @@ if __name__ == "__main__":
         if parsed_args.dynos:
             scale_dyno(parsed_args.dynos, job_type)
         else:
-            logger.info(u"no number of dynos specified, so setting 1")
+            logger.info("no number of dynos specified, so setting 1")
             scale_dyno(1, job_type)
         monitor_till_done(job_type)
         scale_dyno(0, job_type)

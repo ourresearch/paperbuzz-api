@@ -85,7 +85,7 @@ class AltmetricsForDoi(object):
 class OaDoi(object):
     def __init__(self, doi):
         self.doi = doi
-        self.url = u"https://api.oadoi.org/v2/{}".format(doi)
+        self.url = "https://api.oadoi.org/v2/{}".format(doi)
         self.data = {}
 
     def get(self):
@@ -101,7 +101,7 @@ class OaDoi(object):
 class CrossrefMetadata(object):
     def __init__(self, doi):
         self.doi = doi
-        self.url = u"https://api.crossref.org/works/{}/transform/application/vnd.citationstyles.csl+json".format(doi)
+        self.url = "https://api.crossref.org/works/{}/transform/application/vnd.citationstyles.csl+json".format(doi)
         self.data = {}
 
     def get(self):

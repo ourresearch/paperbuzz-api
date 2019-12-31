@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+
 
 # need to get system mendeley library
 from mendeley.exception import MendeleyException
@@ -20,35 +20,35 @@ from util import remove_punctuation
 from util import clean_html
 
 discipline_lookup = {
-    u'Arts and Humanities': u'arts and humanities',
-    u'Design': u'arts and humanities',
-    u'Philosophy': u'arts and humanities',
-    u'Agricultural and Biological Sciences': u'life science',
-    u'Biochemistry, Genetics and Molecular Biology': u'life science',
-    u'Immunology and Microbiology': u'life science',
-    u'Veterinary Science and Veterinary Medicine': u'life science',
-    u'Business, Management and Accounting': u'society',
-    u'Decision Sciences': u'society',
-    u'Economics, Econometrics and Finance': u'society',
-    u'Chemistry': u'life science',
-    u'Computer Science': u'technology',
-    u'Chemical Engineering': u'life science',
-    u'Engineering': u'technology',
-    u'Materials Science': u'technology',
-    u'Earth and Planetary Sciences': u'environment',
-    u'Energy': u'environment',
-    u'Environmental Science': u'environment',
-    u'Medicine and Dentistry': u'health',
-    u'Nursing and Health Professions': u'health',
-    u'Pharmacology, Toxicology and Pharmaceutical Science': u'health',
-    u'Sports and Recreations': u'health',
-    u'Mathematics': u'technology',
-    u'Physics and Astronomy': u'physics and astronomy',
-    u'Neuroscience': u'brain and mind',
-    u'Psychology': u'brain and mind',
-    u'Linguistics': u'society',
-    u'Social Sciences': u'society',
-    u'Unspecified': u'unspecified'
+    'Arts and Humanities': 'arts and humanities',
+    'Design': 'arts and humanities',
+    'Philosophy': 'arts and humanities',
+    'Agricultural and Biological Sciences': 'life science',
+    'Biochemistry, Genetics and Molecular Biology': 'life science',
+    'Immunology and Microbiology': 'life science',
+    'Veterinary Science and Veterinary Medicine': 'life science',
+    'Business, Management and Accounting': 'society',
+    'Decision Sciences': 'society',
+    'Economics, Econometrics and Finance': 'society',
+    'Chemistry': 'life science',
+    'Computer Science': 'technology',
+    'Chemical Engineering': 'life science',
+    'Engineering': 'technology',
+    'Materials Science': 'technology',
+    'Earth and Planetary Sciences': 'environment',
+    'Energy': 'environment',
+    'Environmental Science': 'environment',
+    'Medicine and Dentistry': 'health',
+    'Nursing and Health Professions': 'health',
+    'Pharmacology, Toxicology and Pharmaceutical Science': 'health',
+    'Sports and Recreations': 'health',
+    'Mathematics': 'technology',
+    'Physics and Astronomy': 'physics and astronomy',
+    'Neuroscience': 'brain and mind',
+    'Psychology': 'brain and mind',
+    'Linguistics': 'society',
+    'Social Sciences': 'society',
+    'Unspecified': 'unspecified'
 }
 
 discipline_overrides = {
@@ -187,7 +187,7 @@ class WeeklyStats(db.Model):
         event_count_dict["unpaywall_views_nonacademic"] = len([e for e in unpaywall_events_this_week if not e.is_academic_location])
 
         sources = []
-        for (source_id, num) in event_count_dict.iteritems():
+        for (source_id, num) in event_count_dict.items():
             sources.append({
                 "source_id": source_id,
                 "event_count": num
@@ -205,7 +205,7 @@ class WeeklyStats(db.Model):
         self.updated = datetime.datetime.utcnow()
 
         try:
-            url = u"http://api.altmetric.com/v1/fetch/doi/{doi}?key={key}".format(
+            url = "http://api.altmetric.com/v1/fetch/doi/{doi}?key={key}".format(
                 doi=self.id,
                 key=os.getenv("ALTMETRIC_KEY")
             )
@@ -217,10 +217,10 @@ class WeeklyStats(db.Model):
                 # we got a good status code, the DOI has metrics.
                 self.altmetric_com_api_raw = r.json()
             else:
-                logger.info(u"got unexpected altmetric status_code code {}".format(r.status_code))
+                logger.info("got unexpected altmetric status_code code {}".format(r.status_code))
 
         except requests.Timeout:
-            logger.info(u"got requests.Timeout")
+            logger.info("got requests.Timeout")
 
 
 
@@ -232,7 +232,7 @@ class WeeklyStats(db.Model):
         if not self.abstract:
             r = requests.get("http://doi.org/{}".format(self.id))
             text = r.text
-            if u'</header>' in text:
+            if '</header>' in text:
                 try:
                     text_after_header = text.split("</header", 1)[1]
                     text_after_p = text_after_header.split("																						<p>", 1)[1]
@@ -265,7 +265,7 @@ class WeeklyStats(db.Model):
             self.abstract = self.mendeley_api_raw.get("abstract", None)
         else:
             url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term={}[doi]&tool=paperbuzz&email=team@ourresearch.org&retmode=json".format(self.id)
-            print url
+            print(url)
             r = requests.get(url)
             try:
                 pmid = r.json()["esearchresult"]["idlist"][0]
@@ -274,13 +274,13 @@ class WeeklyStats(db.Model):
 
             if pmid:
                 url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id={}&tool=paperbuzz&email=team@ourresearch.org".format(pmid)
-                print url
+                print(url)
                 r = requests.get(url)
-                abstract_hits = re.findall(u'abstract.*?"(.*?)"', r.text.replace("\n", ""), re.MULTILINE)
+                abstract_hits = re.findall('abstract.*?"(.*?)"', r.text.replace("\n", ""), re.MULTILINE)
                 if abstract_hits:
                     self.abstract = abstract_hits[0]
                 url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id={}&retmode=json&tool=paperbuzz&email=team@ourresearch.org".format(pmid)
-                print url
+                print(url)
                 r = requests.get(url)
                 self.pubmed_api_raw = r.json()["result"][pmid]
 
@@ -353,7 +353,7 @@ class WeeklyStats(db.Model):
             discipline_dict[our_discipline] += num_in_discipline
 
         total_in_all_disciplines = 0
-        for (our_discipline, num) in discipline_dict.iteritems():
+        for (our_discipline, num) in discipline_dict.items():
             total_in_all_disciplines += num
             if num > self.num_main_discipline:
                 self.num_main_discipline = num
@@ -363,7 +363,7 @@ class WeeklyStats(db.Model):
             self.num_main_discipline = None
             self.main_discipline = None
 
-        logger.info(u"discipline for {} is {}={}".format(self.id, self.main_discipline, self.num_main_discipline))
+        logger.info("discipline for {} is {}={}".format(self.id, self.main_discipline, self.num_main_discipline))
 
 
     def sources_dicts_no_events(self):
@@ -395,14 +395,14 @@ class WeeklyStats(db.Model):
     def to_dict_hotness(self):
         metadata_keys = ["year", "journal_name", "journal_authors", "title"]
         open_access_keys = ["best_oa_location", "is_oa", "journal_is_oa"]
-        metadata = dict((k, v) for k, v in self.oadoi_api_raw.iteritems() if k in metadata_keys)
+        metadata = dict((k, v) for k, v in self.oadoi_api_raw.items() if k in metadata_keys)
         metadata["abstract"] = self.display_abstract
         # also use other pubmed data here if no mendeley
 
         ret = {
             "doi": self.id,
             "metadata": metadata,
-            "open_access": dict((k, v) for k, v in self.oadoi_api_raw.iteritems() if k in open_access_keys),
+            "open_access": dict((k, v) for k, v in self.oadoi_api_raw.items() if k in open_access_keys),
             "sources": self.sources,
             "photo": photos.get(self.id, None),
             "debug": {}
@@ -414,7 +414,7 @@ class WeeklyStats(db.Model):
         return ret
 
     def __repr__(self):
-        return u"<WeeklyStats ({}, {}={})>".format(self.id, self.main_discipline, self.num_main_discipline)
+        return "<WeeklyStats ({}, {}={})>".format(self.id, self.main_discipline, self.num_main_discipline)
 
 
 def get_mendeley_session():

@@ -141,7 +141,7 @@ def count_by(timestamps, granularity="day"):
         hist_dict[ts] += 1
 
     ret = []
-    for ts, count in hist_dict.iteritems():
+    for ts, count in hist_dict.items():
         ret.append({
             "date": ts,
             "count": count

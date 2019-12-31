@@ -34,20 +34,20 @@ def update_fn(cls, method, obj_id_list, shortcut_data=None, index=1):
     # if the queue includes items that aren't in the table, build them
     # assume they can be built by calling cls(id=id)
     if num_obj_rows != len(obj_id_list):
-        logger.info(u"not all objects are there, so creating")
+        logger.info("not all objects are there, so creating")
         ids_of_got_objects = [obj.id for obj in obj_rows]
         for id in obj_id_list:
             if id not in ids_of_got_objects:
                 new_obj = cls(id=id)
                 db.session.add(new_obj)
         safe_commit(db)
-        logger.info(u"done")
+        logger.info("done")
 
     q = db.session.query(cls).options(orm.undefer('*')).filter(cls.id.in_(obj_id_list))
     obj_rows = q.all()
     num_obj_rows = len(obj_rows)
 
-    logger.info(u"{pid} {repr}.{method_name}() got {num_obj_rows} objects in {elapsed} seconds".format(
+    logger.info("{pid} {repr}.{method_name}() got {num_obj_rows} objects in {elapsed} seconds".format(
         pid=os.getpid(),
         repr=cls.__name__,
         method_name=method.__name__,
@@ -63,7 +63,7 @@ def update_fn(cls, method, obj_id_list, shortcut_data=None, index=1):
 
         method_to_run = getattr(obj, method.__name__)
 
-        logger.info(u"***")
+        logger.info("***")
         logger.info("#{count} starting {repr}.{method_name}() method".format(
             count=count + (num_obj_rows*index),
             repr=obj,
@@ -75,19 +75,19 @@ def update_fn(cls, method, obj_id_list, shortcut_data=None, index=1):
         else:
             method_to_run()
 
-        logger.info(u"finished {repr}.{method_name}(). took {elapsed} seconds".format(
+        logger.info("finished {repr}.{method_name}(). took {elapsed} seconds".format(
             repr=obj,
             method_name=method.__name__,
             elapsed=elapsed(start_time, 4)
         ))
 
 
-    logger.info(u"committing\n\n")
+    logger.info("committing\n\n")
     start_time = time()
     commit_success = safe_commit(db)
     if not commit_success:
-        logger.info(u"COMMIT fail")
-    logger.info(u"commit took {} seconds".format(elapsed(start_time, 2)))
+        logger.info("COMMIT fail")
+    logger.info("commit took {} seconds".format(elapsed(start_time, 2)))
     db.session.remove()  # close connection nicely
     return None  # important for if we use this on RQ
 
@@ -110,7 +110,7 @@ class UpdateDbQueue():
     def __init__(self, **kwargs):
         self.job = kwargs["job"]
         self.method = self.job
-        self.cls = self.job.im_class
+        self.cls = self.job.__self__.__class__
         self.chunk = kwargs.get("chunk", 10)
         self.shortcut_fn = kwargs.get("shortcut_fn", None)
         self.shortcut_fn_per_chunk = kwargs.get("shortcut_fn_per_chunk", None)
@@ -158,7 +158,7 @@ class UpdateDbQueue():
             my_dyno_name=my_dyno_name,
             queue_table=queue_table
         )
-        logger.info(u"the queue query is:\n{}".format(text_query))
+        logger.info("the queue query is:\n{}".format(text_query))
 
         index = 0
 
@@ -184,14 +184,14 @@ class UpdateDbQueue():
             shortcut_data = None
             if self.shortcut_fn_per_chunk:
                 shortcut_data_start = time()
-                logger.info(u"Getting shortcut data...")
+                logger.info("Getting shortcut data...")
                 shortcut_data = self.shortcut_fn_per_chunk()
-                logger.info(u"Got shortcut data in {} seconds".format(
+                logger.info("Got shortcut data in {} seconds".format(
                     elapsed(shortcut_data_start)))
 
             update_fn(*update_fn_args, index=index, shortcut_data=shortcut_data)
 
-            object_ids_str = u",".join(["'{}'".format(id) for id in object_ids])
+            object_ids_str = ",".join(["'{}'".format(id) for id in object_ids])
             run_sql(db, "update {queue_table} set finished=now() where id in ({ids})".format(
                 queue_table=queue_table, ids=object_ids_str))
 
@@ -208,11 +208,11 @@ class UpdateDbQueue():
                         (num_jobs_remaining / float(jobs_per_hour_this_chunk)) * 60,
                         1
                     )
-                    logger.info(u"\n\nWe're doing {} jobs per hour. At this rate, if we had to do everything up to limit, done in {}min".format(
+                    logger.info("\n\nWe're doing {} jobs per hour. At this rate, if we had to do everything up to limit, done in {}min".format(
                         int(jobs_per_hour_this_chunk),
                         predicted_mins_to_finish
                     ))
-                    logger.info(u"\t{} seconds this loop, {} chunks in {} seconds, {} seconds/chunk average\n".format(
+                    logger.info("\t{} seconds this loop, {} chunks in {} seconds, {} seconds/chunk average\n".format(
                         elapsed(new_loop_start_time),
                         index,
                         elapsed(start_time),
@@ -220,7 +220,7 @@ class UpdateDbQueue():
                     ))
                 except ZeroDivisionError:
                     # logger.info(u"not printing status because divide by zero")
-                    logger.info(u"."),
+                    logger.info("."),
 
 
 
@@ -235,7 +235,7 @@ def main(fn, optional_args=None):
     else:
         globals()[fn]()
 
-    logger.info(u"total time to run: {} seconds".format(elapsed(start)))
+    logger.info("total time to run: {} seconds".format(elapsed(start)))
 
 
 if __name__ == "__main__":
@@ -250,7 +250,7 @@ if __name__ == "__main__":
     function = args["function"]
     optional_args = args["optional_args"]
 
-    logger.info(u"running main.py {function} with these args:{optional_args}\n".format(
+    logger.info("running main.py {function} with these args:{optional_args}\n".format(
         function=function, optional_args=optional_args))
 
     main(function, optional_args)

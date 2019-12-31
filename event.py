@@ -47,7 +47,7 @@ class UnpaywallEvent(db.Model):
     @property
     def week(self):
         d = self.collected
-        if isinstance(d, basestring):
+        if isinstance(d, str):
             d = dateutil.parser.parse(d)
         return d.isocalendar()[1]
 
@@ -96,7 +96,7 @@ class UnpaywallEvent(db.Model):
             "url": None
         }
     def __repr__(self):
-        return u"<UnpaywallEvent ({})>".format(self.doi, self.collected)
+        return "<UnpaywallEvent ({})>".format(self.doi, self.collected)
 
 
 class CedEvent(db.Model):
@@ -125,7 +125,7 @@ class CedEvent(db.Model):
     @property
     def week(self):
         d = self.occurred_at
-        if isinstance(d, basestring):
+        if isinstance(d, str):
             d = dateutil.parser.parse(d)
         return d.isocalendar()[1]
 
@@ -147,7 +147,7 @@ class CedEvent(db.Model):
         return self.api_raw["subj_id"]
 
     def get_uniqueness_key(self):
-        key = u"{} {} {}".format(self.source_id, self.normalized_subj_id, self.action)
+        key = "{} {} {}".format(self.source_id, self.normalized_subj_id, self.action)
         hash_key = hashlib.md5(key.encode('utf-8')).hexdigest()
         return hash_key
 
@@ -170,7 +170,7 @@ class CedEvent(db.Model):
         return self.subj_id
 
     def __repr__(self):
-        return u"<CedEvent ({} {})>".format(self.source_id, self.id)
+        return "<CedEvent ({} {})>".format(self.source_id, self.id)
 
 
 class CedSource(db.Model):
@@ -187,7 +187,7 @@ class CedSource(db.Model):
         }
 
     def __repr__(self):
-        return u"<CedSource ({} {} {})>".format(self.id, self.display_name, self.icon_url)
+        return "<CedSource ({} {} {})>".format(self.id, self.display_name, self.icon_url)
 
 
 class Event(object):
