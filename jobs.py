@@ -10,6 +10,7 @@ from app import logger
 from util import elapsed
 from util import safe_commit
 from util import run_sql
+from date_range import DateRange
 
 
 def update_fn(cls, method, obj_id_list, shortcut_data=None, index=1):
@@ -106,7 +107,7 @@ class UpdateDbQueue:
     def __init__(self, **kwargs):
         self.job = kwargs["job"]
         self.method = self.job
-        self.cls = self.job.__class__
+        self.cls = DateRange  # manually set class to support python 3
         self.chunk = kwargs.get("chunk", 10)
         self.shortcut_fn = kwargs.get("shortcut_fn", None)
         self.shortcut_fn_per_chunk = kwargs.get("shortcut_fn_per_chunk", None)
