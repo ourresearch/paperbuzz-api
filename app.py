@@ -15,7 +15,6 @@ from sqlalchemy.pool import Pool
 import logging
 import sys
 import os
-import redis
 import requests
 from util import safe_commit
 
