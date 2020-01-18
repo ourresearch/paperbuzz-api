@@ -65,14 +65,14 @@ def normalize(text):
     response = remove_punctuation(response)
     response = re.sub(r"\b(a|an|the)\b", "", response)
     response = re.sub(r"\b(and)\b", "", response)
-    response = re.sub("\s+", "", response)
+    response = re.sub(r"\s+", "", response)
     return response
 
 def normalize_simple(text):
     response = text.lower()
     response = remove_punctuation(response)
     response = re.sub(r"\b(a|an|the)\b", "", response)
-    response = re.sub("\s+", "", response)
+    response = re.sub(r"\s+", "", response)
     return response
 
 def remove_punctuation(input_string):
@@ -159,7 +159,7 @@ def safe_commit(db):
 
 def is_doi_url(url):
     # test urls at https://regex101.com/r/yX5cK0/2
-    p = re.compile("https?:\/\/(?:dx.)?doi.org\/(.*)")
+    p = re.compile(r"https?:\/\/(?:dx.)?doi.org\/(.*)")
     matches = re.findall(p, url.lower())
     if len(matches) > 0:
         return True
@@ -491,8 +491,8 @@ def validate_author_url(author_url):
 
 def validate_subject_url(author_url, subject_url):
     if subject_url.startswith('twitter://'):
-        screen_name = re.findall('twitter.com\/([A-Za-z0-9_]{1,15}$)', author_url)[0]
-        status_id = re.findall('status\?id=(\d+$)', subject_url)[0]
+        screen_name = re.findall(r'twitter.com\/([A-Za-z0-9_]{1,15}$)', author_url)[0]
+        status_id = re.findall(r'status\?id=(\d+$)', subject_url)[0]
         return 'http://twitter.com/{}/statuses/{}'.format(screen_name, status_id)
     else:
         return subject_url
