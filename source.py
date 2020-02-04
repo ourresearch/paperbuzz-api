@@ -3,8 +3,6 @@ from event import Event
 from event import WikipediaPageEvent
 
 
-
-
 def make_event_source(id):
     if id == "wikipedia":
         return WikipediaEventSource(id)
@@ -55,7 +53,6 @@ class EventSource(object):
         return ret
 
 
-
 class WikipediaEventSource(EventSource):
     # https://www.eventdata.crossref.org/guide/sources/wikipedia/
 
@@ -63,14 +60,12 @@ class WikipediaEventSource(EventSource):
     # single Event in our model rolls up a whole bunch of CED events.
     # We want just one Event for every wiki page, and they have oodles.
 
-
     def _get_base_wiki_page_for_url(self, url):
         for my_event in self.events:
             if my_event.is_same_page_as(url):
                 return my_event
 
         return None
-
 
     def add_event(self, ced_event):
         event_for_this_wiki_page = self._get_base_wiki_page_for_url(ced_event["subj_id"])
@@ -116,17 +111,3 @@ def count_by(timestamps, granularity="day"):
     ret = sorted(ret, key=lambda x: x["date"])
 
     return ret
-
-
-
-
-
-
-
-
-
-
-
-
-
-

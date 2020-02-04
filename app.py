@@ -5,18 +5,12 @@ from flask_debugtoolbar import DebugToolbarExtension
 
 import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
-
-from sqlalchemy import exc
-from sqlalchemy import event
-from sqlalchemy import func
 from sqlalchemy.pool import NullPool
-from sqlalchemy.pool import Pool
 
 import logging
 import sys
 import os
 import requests
-from util import safe_commit
 
 HEROKU_APP_NAME = "paperbuzz-api"
 
@@ -53,7 +47,6 @@ sentry_sdk.init(
 )
 
 app = Flask(__name__)
-# app.debug = True
 
 
 # database stuff
@@ -87,37 +80,3 @@ if (os.getenv("FLASK_DEBUG", False) == "True"):
 # gzip responses
 Compress(app)
 app.config["COMPRESS_DEBUG"] = compress_json
-
-
-# imports got here for tables that need auto-created.
-# import publication
-# import version
-#
-# import mendeley_source
-# db.create_all()
-# commit_success = safe_commit(db)
-# if not commit_success:
-#     print u"COMMIT fail making objects"
-
-
-# from http://docs.sqlalchemy.org/en/latest/core/pooling.html
-# This recipe will ensure that a new Connection will succeed even if connections in the pool
-# have gone stale, provided that the database server is actually running.
-# The expense is that of an additional execution performed per checkout
-# @event.listens_for(Pool, "checkout")
-# def ping_connection(dbapi_connection, connection_record, connection_proxy):
-#     cursor = dbapi_connection.cursor()
-#     try:
-#         cursor.execute("SELECT 1")
-#     except:
-#         # optional - dispose the whole pool
-#         # instead of invalidating one at a time
-#         # connection_proxy._pool.dispose()
-#
-#         # raise DisconnectionError - pool will try
-#         # connecting again up to three times before raising.
-#         raise exc.DisconnectionError()
-#     cursor.close()
-
-
-

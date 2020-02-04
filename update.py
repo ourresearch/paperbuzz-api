@@ -51,7 +51,6 @@ def run_update(parsed_args):
     logger.info("finished update in {} secconds".format(elapsed(start)))
 
 
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run stuff.")
     # for everything

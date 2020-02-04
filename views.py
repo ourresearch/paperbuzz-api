@@ -20,9 +20,8 @@ from weekly_stats import WeeklyStats
 
 from doi import Doi
 
-
-
 # try it at https://api.paperbuzz.org/v0/doi/10.1371/journal.pone.0000308
+
 
 def json_dumper(obj):
     """
@@ -75,10 +74,6 @@ def after_request_stuff(resp):
     return resp
 
 
-
-
-
-
 # ENDPOINTS
 #
 ######################################################################################
@@ -123,6 +118,7 @@ papers_by_discipline = {
         "social science": ["10.1080/01436597.2017.1369037", "10.1057/palcomms.2017.93", "10.1007/s13524-017-0611-1",
                            "10.1111/dar.12596", "10.1038/s41562-017-0195-1"]
     }
+
 
 # of form /2017/week-32
 @app.route("/v0/hot/2017/<week_string>", methods=["GET"])
@@ -185,14 +181,11 @@ def get_hot_week_endpoint(week_string):
     return jsonify({"list": response})
 
 
-
-
 @app.route("/v0/doi/<path:doi>", methods=["GET"])
 def get_doi_endpoint(doi):
     my_doi = Doi(clean_doi(doi))
     my_doi.get()
     return jsonify(my_doi.to_dict())
-
 
 
 @app.route("/v0/event/<path:event_id>", methods=["GET"])
