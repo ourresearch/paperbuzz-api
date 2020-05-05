@@ -1,24 +1,14 @@
-from flask import make_response
-from flask import request
-from flask import abort
-from flask import render_template
-from flask import jsonify
-
 import json
 import os
-import logging
-import sys
-import requests
-import re
 import random
+import sys
 
-from app import app
-from app import db
-from util import clean_doi
-from util import get_sql_answers
-from weekly_stats import WeeklyStats
+from flask import abort, jsonify, make_response, render_template, request
 
+from app import app, db
 from doi import Doi
+from util import clean_doi, get_sql_answers
+from weekly_stats import WeeklyStats
 
 # try it at https://api.paperbuzz.org/v0/doi/10.1371/journal.pone.0000308
 
@@ -199,20 +189,3 @@ def get_event_endpoint(event_id):
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5009))
     app.run(host='0.0.0.0', port=port, debug=True, threaded=True)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

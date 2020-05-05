@@ -1,31 +1,17 @@
-import os
 import argparse
-from time import time
-from time import sleep
-from sqlalchemy import sql
-from sqlalchemy import exc
-from subprocess import call
-import heroku3
+import os
 from pprint import pprint
-import datetime
+from subprocess import call
+from time import sleep, time
+
+import heroku3
 import sentry_sdk
 
-
-from app import db
-from app import logger
-
+import jobs_defs  # needs to be imported so the definitions get loaded into the registry
+from app import HEROKU_APP_NAME, db, logger
 from jobs import update_registry
-import jobs_defs # needs to be imported so the definitions get loaded into the registry
-from util import elapsed
-from util import run_sql
-from util import get_sql_answer
-from util import get_sql_answers
-from util import clean_doi
-from app import HEROKU_APP_NAME
+from util import clean_doi, elapsed, get_sql_answer, get_sql_answers, run_sql
 
-
-# to get the clarivate dois in
-# date; grep "WOS:" DOI_Output.txt | sed 's:\\:\\\\:g' | psql postgres://user:pass@host:5432/dbname?ssl=true -c "copy dois_from_wos (wos_id) from STDIN;"; date;
 sentry_sdk.init(os.environ.get('SENTRY_DSN'))
 
 
@@ -41,8 +27,6 @@ def monitor_till_done(job_type):
     loop_thresholds = {"short": 30, "long": 10*60, "medium": 60}
     loop_unfinished = {"short": num_unfinished, "long": num_unfinished}
     loop_start_time = {"short": time(), "long": time()}
-
-    # print_idle_dynos(job_type)
 
     while all(loop_unfinished.values()):
         for loop in ["short", "long"]:
@@ -77,13 +61,16 @@ def number_total_on_queue(job_type):
     num = get_sql_answer(db, "select count(*) from {}".format(table_name(job_type)))
     return num
 
+
 def number_waiting_on_queue(job_type):
     num = get_sql_answer(db, "select count(*) from {} where started is null".format(table_name(job_type)))
     return num
 
+
 def number_unfinished(job_type):
     num = get_sql_answer(db, "select count(*) from {} where finished is null".format(table_name(job_type)))
     return num
+
 
 def print_status(job_type):
     num_dois = number_total_on_queue(job_type)
@@ -91,6 +78,7 @@ def print_status(job_type):
     if num_dois:
         logger.info("There are {} dois in the queue, of which {} ({}%) are waiting to run".format(
             num_dois, num_waiting, int(100*float(num_waiting)/num_dois)))
+
 
 def kick(job_type):
     q = """update {table_name} set started=null, finished=null
@@ -100,13 +88,16 @@ def kick(job_type):
     run_sql(db, q)
     print_status(job_type)
 
+
 def reset_enqueued(job_type):
     q = "update {} set started=null, finished=null".format(table_name(job_type))
     run_sql(db, q)
 
+
 def truncate(job_type):
     q = "truncate table {}".format(table_name(job_type))
     run_sql(db, q)
+
 
 def table_name(job_type):
     table_name = "doi_queue_paperbuzz"
@@ -116,6 +107,7 @@ def table_name(job_type):
         table_name += "_dates"
     return table_name
 
+
 def process_name(job_type):
     process_name = "run" # formation name is from Procfile
     if job_type=="hybrid":
@@ -123,6 +115,7 @@ def process_name(job_type):
     elif job_type=="dates":
         process_name += "_dates"
     return process_name
+
 
 def num_dynos(job_type):
     heroku_conn = heroku3.from_key(os.getenv("HEROKU_API_KEY"))
@@ -133,6 +126,7 @@ def num_dynos(job_type):
     except (KeyError, TypeError) as e:
         pass
     return num_dynos
+
 
 def print_idle_dynos(job_type):
     heroku_conn = heroku3.from_key(os.getenv("HEROKU_API_KEY"))
@@ -150,6 +144,7 @@ def print_idle_dynos(job_type):
     # logger.info(u"dynos stopped:", [d.name for d in running_dynos if d.name not in dynos_still_working_names])
     # kill_list = [d.kill() for d in running_dynos if d.name not in dynos_still_working_names]
 
+
 def scale_dyno(n, job_type):
     logger.info("starting with {} dynos".format(num_dynos(job_type)))
     logger.info("setting to {} dynos".format(n))
@@ -160,8 +155,6 @@ def scale_dyno(n, job_type):
     logger.info("sleeping for 2 seconds while it kicks in")
     sleep(2)
     logger.info("verifying: now at {} dynos".format(num_dynos(job_type)))
-
-
 
 
 def print_logs(job_type):
@@ -236,14 +229,11 @@ def add_dois_to_queue_from_query(where, job_type):
        FROM crossref where id in (select id from {table_name})""".format(
         table_name=table_name(job_type))
 
-    # if job_type:
-    #     command_with_hybrid = command.replace("response_jsonb", "response_with_hybrid").replace("export_queue", "export_queue_with_hybrid")
     run_sql(db, command)
 
     # they are already lowercased
     logger.info("add_dois_to_queue_from_query done in {} seconds".format(elapsed(start, 1)))
     print_status(job_type)
-
 
 
 def run(parsed_args, job_type):
@@ -265,8 +255,8 @@ def run(parsed_args, job_type):
         my_event = CedEvent.query.get(parsed_args.id)
         pprint(my_event)
 
-
 # python doi_queue.py --hybrid --filename=data/dois_juan_accuracy.csv --dynos=40 --soup
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run stuff.")
@@ -349,4 +339,3 @@ if __name__ == "__main__":
 
     if parsed_args.id or parsed_args.doi or parsed_args.run:
         run(parsed_args, job_type)
-
