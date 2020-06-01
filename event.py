@@ -145,7 +145,6 @@ class WikipediaPageEvent(Event):
     def _find_stem(self, url):
         return url.split("&oldid=")[0]
 
-
     def add_ced_event(self, ced_event):
 
         # we are not interested in "replaces" or "is_version_of" for now.
@@ -160,7 +159,6 @@ class WikipediaPageEvent(Event):
 
         # otherwise, we are not interested in this new event.
         return False
-
 
     def to_dict(self):
         ret = super(WikipediaPageEvent, self).to_dict()

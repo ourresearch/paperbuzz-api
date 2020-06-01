@@ -21,6 +21,7 @@ python update.py Package.test --id 0000-1111-2222-3333
 
 """
 
+
 def parse_update_optional_args(parser):
     # just for updating lots
     parser.add_argument('--limit', "-l", nargs="?", type=int, help="how many jobs to do")
@@ -57,5 +58,3 @@ if __name__ == "__main__":
     parser.add_argument('fn', type=str, help="what function you want to run")
     parsed_args = parse_update_optional_args(parser)
     run_update(parsed_args)
-
-

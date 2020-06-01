@@ -1,19 +1,17 @@
+import bisect
+import collections
 import datetime
-import time
-import unicodedata
-import sqlalchemy
 import logging
 import math
-import bisect
-import urllib.parse
 import re
-import os
-import collections
+import time
+import unicodedata
+import urllib.parse
+
 import requests
-import json
+import sqlalchemy
+from sqlalchemy import exc, sql
 from unidecode import unidecode
-from sqlalchemy import sql
-from sqlalchemy import exc
 
 
 class NoDoiException(Exception):
@@ -404,34 +402,6 @@ def get_random_dois(n, from_date=None, only_journal_articles=True):
         items = r.json()["message"]["items"]
         dois += [item["DOI"].lower() for item in items]
     return dois
-
-
-# from https://github.com/elastic/elasticsearch-py/issues/374
-# to work around unicode problem
-# import elasticsearch
-# class JSONSerializerPython2(elasticsearch.serializer.JSONSerializer):
-#     """Override elasticsearch library serializer to ensure it encodes utf characters during json dump.
-#     See original at: https://github.com/elastic/elasticsearch-py/blob/master/elasticsearch/serializer.py#L42
-#     A description of how ensure_ascii encodes unicode characters to ensure they can be sent across the wire
-#     as ascii can be found here: https://docs.python.org/2/library/json.html#basic-usage
-#     """
-#     def dumps(self, data):
-#         # don't serialize strings
-#         if isinstance(data, elasticsearch.compat.string_types):
-#             return data
-#         try:
-#             return json.dumps(data, default=self.default, ensure_ascii=True)
-#         except (ValueError, TypeError) as e:
-#             raise elasticsearch.exceptions.SerializationError(data, e)
-
-
-# def restart_dyno(app_name, dyno_name):
-#     cloud = heroku.from_key(os.getenv("HEROKU_API_KEY"))
-#     app = cloud.apps[app_name]
-#     process = app.processes[dyno_name]
-#     process.restart()
-#     print u"restarted {} on {}!".format(dyno_name, app_name)
-
 
 def get_tree(page):
     page = page.replace("&nbsp;", " ")  # otherwise starts-with for lxml doesn't work

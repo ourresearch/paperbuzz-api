@@ -78,7 +78,6 @@ def update_fn(cls, method, obj_id_list, shortcut_data=None, index=1):
             elapsed=elapsed(start_time, 4)
         ))
 
-
     logger.info("committing\n\n")
     start_time = time()
     commit_success = safe_commit(db)
@@ -250,5 +249,3 @@ if __name__ == "__main__":
     main(function, optional_args)
 
     db.session.remove()
-
-
