@@ -1,7 +1,7 @@
 Flask==1.1.2
 Flask-Compress==1.5.0
 Flask-DebugToolbar==0.11.0
-Flask-SQLAlchemy==2.4.3
+Flask-SQLAlchemy==2.4.4
 gunicorn==20.0.4
 heroku3==4.2.1
 mendeley==0.3.2
@@ -10,6 +10,6 @@ psycopg2==2.8.5
 pytest==5.4.3
 requests[security] == 2.24.0
 requests-cache==0.5.2
-sentry-sdk[flask]==0.15.1
+sentry-sdk[flask]==0.16.2
 shortuuid==1.0.1
 unidecode==1.1.1
