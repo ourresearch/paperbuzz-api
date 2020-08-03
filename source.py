@@ -4,7 +4,7 @@ from event import WikipediaPageEvent
 
 
 def make_event_source(id):
-    if id == "wikipedia":
+    if id.id == "wikipedia":
         return WikipediaEventSource(id)
     else:
         return EventSource(id)
