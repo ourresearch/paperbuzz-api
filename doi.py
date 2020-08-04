@@ -90,7 +90,7 @@ class OaDoi(object):
         self.data = {}
 
     def get(self):
-        r = requests_retry_session(retries=3).get(self.url + '?email=team@ourresearch.org', timeout=3)
+        r = requests_retry_session(retries=2).get(self.url + '?email=team@ourresearch.org', timeout=5)
         if r.status_code == 200:
             self.data = r.json()
 
