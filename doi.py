@@ -3,7 +3,7 @@ import requests
 
 from app import db
 from source import make_event_source
-from event import CedEvent, MetadataCache
+from event import CedEvent, MetadataCache, ManyEventsCache
 from util import requests_retry_session
 
 
@@ -22,6 +22,35 @@ class Doi(object):
     def altmetrics_dict_including_unpaywall_views(self):
         altmetrics_value = self.altmetrics.to_dict()
         return altmetrics_value
+
+    def is_cached_not_expired(self):
+        cached_item = ManyEventsCache.query.get(self.doi)
+        expired = datetime.datetime.today() - datetime.timedelta(days=7)
+        if cached_item and cached_item.updated > expired:
+            return True
+
+    def cached_response(self):
+        cached_item = ManyEventsCache.query.get(self.doi)
+        return cached_item.api_raw
+
+    def save_to_cache(self, response):
+        num_events = 0
+        for item in response['altmetrics_sources']:
+            num_events += item['events_count']
+
+        # cache response if DOI has large number of events
+        if num_events > 1000:
+            existing_cache_item = ManyEventsCache.query.get(self.doi)
+            if existing_cache_item:
+                # cache expired, need to update
+                existing_cache_item.updated = datetime.datetime.utcnow()
+                existing_cache_item.api_raw = response
+                db.session.commit()
+            else:
+                # not in case, save as new
+                new_cache_item = ManyEventsCache(id=self.doi, api_raw=response)
+                db.session.add(new_cache_item)
+                db.session.commit()
 
     def to_dict(self):
         altmetrics = self.altmetrics.to_dict()

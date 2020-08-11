@@ -174,8 +174,14 @@ def get_hot_week_endpoint(week_string):
 @app.route("/v0/doi/<path:doi>", methods=["GET"])
 def get_doi_endpoint(doi):
     my_doi = Doi(clean_doi(doi))
-    my_doi.get()
-    return jsonify(my_doi.to_dict())
+    if my_doi.is_cached_not_expired():
+        # responses with many events are cached in the database
+        response = my_doi.cached_response()
+    else:
+        my_doi.get()
+        response = my_doi.to_dict()
+        my_doi.save_to_cache(response)
+    return jsonify(response)
 
 
 @app.route("/v0/event/<path:event_id>", methods=["GET"])

@@ -175,3 +175,17 @@ class MetadataCache(db.Model):
         self.id = id
         self.api_raw = api_raw
         self.updated = datetime.datetime.utcnow()
+
+
+class ManyEventsCache(db.Model):
+    """
+    A cache for storing API responses with many events.
+    """
+    id = db.Column(db.Text, primary_key=True)
+    api_raw = db.Column(JSONB)
+    updated = db.Column(db.DateTime)
+
+    def __init__(self, id, api_raw):
+        self.id = id
+        self.api_raw = api_raw
+        self.updated = datetime.datetime.utcnow()
