@@ -1,6 +1,8 @@
 import datetime
 import requests
 
+from requests.exceptions import ReadTimeout
+
 from app import db
 from source import make_event_source
 from event import CedEvent, MetadataCache, ManyEventsCache
@@ -141,10 +143,13 @@ class CrossrefMetadata(object):
         if cached_item and cached_item.updated > expired:
             self.data = cached_item.api_raw
         else:
-            r = requests.get(self.url, timeout=10)
-            if r.status_code == 200:
-                self.data = r.json()
-                self.save_to_cache()
+            try:
+                r = requests.get(self.url, timeout=3)
+                if r.status_code == 200:
+                    self.data = r.json()
+                    self.save_to_cache()
+            except ReadTimeout:
+                self.data = {}
 
     def to_dict(self):
         self.data["crossref_url"] = self.url
