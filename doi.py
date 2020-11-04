@@ -141,7 +141,7 @@ class CrossrefMetadata(object):
         if cached_item and cached_item.updated > expired:
             self.data = cached_item.api_raw
         else:
-            r = requests.get(self.url, timeout=3)
+            r = requests.get(self.url, timeout=6)
             if r.status_code == 200:
                 self.data = r.json()
                 self.save_to_cache()
