@@ -15,7 +15,6 @@ from app import db
 from app import logger
 from doi import Doi
 from event import CedEvent
-from util import remove_punctuation
 from util import clean_html
 
 discipline_lookup = {
