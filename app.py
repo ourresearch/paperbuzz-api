@@ -17,9 +17,7 @@ HEROKU_APP_NAME = "paperbuzz-api"
 # set up logging
 # see http://wiki.pylonshq.com/display/pylonscookbook/Alternative+logging+configuration
 logging.basicConfig(
-    stream=sys.stdout,
-    level=logging.DEBUG,
-    format='%(name)s - %(message)s'
+    stream=sys.stdout, level=logging.DEBUG, format="%(name)s - %(message)s"
 )
 logger = logging.getLogger("paperbuzz")
 
@@ -30,7 +28,7 @@ libraries_to_mum = [
     "oauthlib",
     "boto",
     "newrelic",
-    "RateLimiter"
+    "RateLimiter",
 ]
 
 for a_library in libraries_to_mum:
@@ -50,28 +48,31 @@ app = Flask(__name__)
 
 
 # database stuff
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = True  # as instructed, to suppress warning
+app.config[
+    "SQLALCHEMY_TRACK_MODIFICATIONS"
+] = True  # as instructed, to suppress warning
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
-app.config['SQLALCHEMY_ECHO'] = (os.getenv("SQLALCHEMY_ECHO", False) == "True")
+app.config["SQLALCHEMY_ECHO"] = os.getenv("SQLALCHEMY_ECHO", False) == "True"
 
 # from http://stackoverflow.com/a/12417346/596939
 class NullPoolSQLAlchemy(SQLAlchemy):
     def apply_driver_hacks(self, app, info, options):
-        options['poolclass'] = NullPool
+        options["poolclass"] = NullPool
         return super(NullPoolSQLAlchemy, self).apply_driver_hacks(app, info, options)
+
 
 db = NullPoolSQLAlchemy(app)
 
 # do compression.  has to be above flask debug toolbar so it can override this.
-compress_json = os.getenv("COMPRESS_DEBUG", "False")=="True"
+compress_json = os.getenv("COMPRESS_DEBUG", "False") == "True"
 
 
 # set up Flask-DebugToolbar
-if (os.getenv("FLASK_DEBUG", False) == "True"):
+if os.getenv("FLASK_DEBUG", False) == "True":
     logger.info("Setting app.debug=True; Flask-DebugToolbar will display")
     compress_json = False
     app.debug = True
-    app.config['DEBUG'] = True
+    app.config["DEBUG"] = True
     app.config["DEBUG_TB_INTERCEPT_REDIRECTS"] = False
     app.config["SQLALCHEMY_RECORD_QUERIES"] = True
     app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")

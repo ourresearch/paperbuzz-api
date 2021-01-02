@@ -35,8 +35,8 @@ class Doi(object):
 
     def save_to_cache(self, response):
         num_events = 0
-        for item in response['altmetrics_sources']:
-            num_events += item['events_count']
+        for item in response["altmetrics_sources"]:
+            num_events += item["events_count"]
 
         # cache response if DOI has large number of events
         if num_events > 1000:
@@ -60,7 +60,7 @@ class Doi(object):
             "altmetrics_sources": altmetrics["sources"],
             "crossref_event_data_url": altmetrics["crossref_event_data_url"],
             "metadata": self.metadata.to_dict(),
-            "open_access": self.open_access.to_dict()
+            "open_access": self.open_access.to_dict(),
         }
         return ret
 
@@ -80,7 +80,7 @@ class AltmetricsForDoi(object):
         #     10.2190/EC.43.3.f                       # no events
         #     10.1371/journal.pone.0000308            # many events, incl lots of wiki
         #     """
-        ced_events = CedEvent.query.filter(CedEvent.doi==self.doi).limit(2500).all()
+        ced_events = CedEvent.query.filter(CedEvent.doi == self.doi).limit(2500).all()
         for ced_event in ced_events:
             self.add_event(ced_event)
 
@@ -107,7 +107,7 @@ class AltmetricsForDoi(object):
     def to_dict(self):
         ret = {
             "crossref_event_data_url": self.ced_url,
-            "sources": [s.to_dict() for s in self.sources]
+            "sources": [s.to_dict() for s in self.sources],
         }
         return ret
 
@@ -119,7 +119,9 @@ class OaDoi(object):
         self.data = {}
 
     def get(self):
-        r = requests_retry_session(retries=2).get(self.url + '?email=team@ourresearch.org', timeout=5)
+        r = requests_retry_session(retries=2).get(
+            self.url + "?email=team@ourresearch.org", timeout=5
+        )
         if r.status_code == 200:
             self.data = r.json()
 
@@ -131,12 +133,14 @@ class OaDoi(object):
 class CrossrefMetadata(object):
     def __init__(self, doi):
         self.doi = doi
-        self.url = "https://api.crossref.org/works/{}/transform/application/vnd.citationstyles.csl+json".format(doi)
+        self.url = "https://api.crossref.org/works/{}/transform/application/vnd.citationstyles.csl+json".format(
+            doi
+        )
         self.data = {}
 
     def get(self):
         cached_item = MetadataCache.query.get(self.doi)
-        expired = datetime.datetime.today() - datetime.timedelta(6*365/12)
+        expired = datetime.datetime.today() - datetime.timedelta(6 * 365 / 12)
 
         if cached_item and cached_item.updated > expired:
             self.data = cached_item.api_raw

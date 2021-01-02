@@ -13,7 +13,7 @@ class CedEvent(db.Model):
     id = db.Column(db.Text, primary_key=True)
     updated = db.Column(db.DateTime)
     doi = db.Column(db.Text)
-    source_id = db.Column(db.Text, db.ForeignKey('ced_source.id'))
+    source_id = db.Column(db.Text, db.ForeignKey("ced_source.id"))
     source = db.relationship("CedSource")
     normalized_subj_id = db.Column(db.Text)
     occurred_at = db.Column(db.DateTime)
@@ -49,7 +49,6 @@ class CedEvent(db.Model):
             return self.api_raw["message_action"]
         return None
 
-
     @property
     def subj_id(self):
         if not self.api_raw:
@@ -58,7 +57,7 @@ class CedEvent(db.Model):
 
     def get_uniqueness_key(self):
         key = "{} {} {}".format(self.source_id, self.normalized_subj_id, self.action)
-        hash_key = hashlib.md5(key.encode('utf-8')).hexdigest()
+        hash_key = hashlib.md5(key.encode("utf-8")).hexdigest()
         return hash_key
 
     def get_occurred_at(self):
@@ -74,7 +73,7 @@ class CedEvent(db.Model):
     def get_normalized_subj_id(self):
         if not self.subj_id:
             return None
-        if self.source_id=="wikipedia":
+        if self.source_id == "wikipedia":
             # return just the main page part from here: https://en.wikipedia.org/w/index.php?title=George_Harrison&oldid=799153948
             return self.subj_id.split("&oldid")[0]
         return self.subj_id
@@ -93,11 +92,13 @@ class CedSource(db.Model):
         return {
             "id": self.id,
             "display_name": self.display_name,
-            "icon_url": url_for('static', filename=self.icon_url, _external=True)
+            "icon_url": url_for("static", filename=self.icon_url, _external=True),
         }
 
     def __repr__(self):
-        return "<CedSource ({} {} {})>".format(self.id, self.display_name, self.icon_url)
+        return "<CedSource ({} {} {})>".format(
+            self.id, self.display_name, self.icon_url
+        )
 
 
 class Event(object):
@@ -127,7 +128,7 @@ class Event(object):
         return {
             "author": author_url,
             "occurred_at": self.ced_event["occurred_at"],
-            "url": subject_url
+            "url": subject_url,
         }
 
 
@@ -181,6 +182,7 @@ class ManyEventsCache(db.Model):
     """
     A cache for storing API responses with many events.
     """
+
     id = db.Column(db.Text, primary_key=True)
     api_raw = db.Column(JSONB)
     updated = db.Column(db.DateTime)
