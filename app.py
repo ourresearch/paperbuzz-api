@@ -39,10 +39,10 @@ for a_library in libraries_to_mum:
 requests.packages.urllib3.disable_warnings()
 
 # error reporting with sentry
-# sentry_sdk.init(
-#     dsn=os.environ.get('SENTRY_DSN'),
-#     integrations=[FlaskIntegration()]
-# )
+sentry_sdk.init(
+    dsn=os.environ.get('SENTRY_DSN'),
+    integrations=[FlaskIntegration()]
+)
 
 app = Flask(__name__)
 
