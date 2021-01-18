@@ -35,7 +35,7 @@ class DateRange(db.Model):
     def last(self):
         return self.first + datetime.timedelta(days=1)
 
-    def get_events(self, rows=10000):
+    def get_events(self, rows=1000):
         headers={"Accept": "application/json", "User-Agent": "ourresearch.org"}
         base_url = "https://api.eventdata.crossref.org/v1/events?rows={rows}&filter=from-collected-date:{first},until-collected-date:{first}&mailto=team@ourresearch.org"
 
