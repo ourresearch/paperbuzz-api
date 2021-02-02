@@ -6,7 +6,7 @@ from util import run_sql
 def daily_update():
     # get date we want to add to database
     today = datetime.today()
-    new_date = (today - timedelta(days=2)).strftime('%Y-%m-%d')
+    new_date = (today - timedelta(days=1)).strftime('%Y-%m-%d')
 
     # check if date already exists, if not then add it
     ts = new_date + ' 00:00:00.000000'
