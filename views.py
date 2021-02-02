@@ -1,12 +1,15 @@
+from datetime import datetime, timedelta
 import json
 import os
 import random
 import sys
 
 from flask import abort, jsonify, make_response, render_template, request
+from sqlalchemy import desc, func
 
 from app import app, db
 from doi import Doi
+from event import CedEvent
 from util import clean_doi, get_sql_answers
 from weekly_stats import WeeklyStats
 
@@ -259,6 +262,25 @@ def get_doi_endpoint(doi):
 def get_event_endpoint(event_id):
     response = {"event_id": event_id}
     return jsonify(response)
+
+
+@app.route("/trending", methods=["GET"])
+def trending():
+    today = datetime.now()
+    days_ago = today - timedelta(days=8)
+
+    events = (
+        db.session.query(CedEvent.doi, func.count(CedEvent.doi).label("total"))
+        .group_by(CedEvent.doi)
+        .filter(CedEvent.occurred_at >= days_ago)
+        .order_by(desc("total"))
+        .limit(10)
+        .all()
+    )
+    root_url = 'https://paperbuzz.org/details/{}'
+
+    results = [{'url': root_url.format(event.doi), 'count': event.total} for event in events]
+    return jsonify(results)
 
 
 if __name__ == "__main__":
