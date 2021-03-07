@@ -5,15 +5,15 @@ from util import run_sql
 
 def old_dates_update():
     """
-    This function updates data by pulling 15 old dates from the past 3 years.
-    When run twice each day, the entire 3 years will update every 36 days.
+    This function updates data by pulling 5 old dates from the past year.
+    When run once each day, the entire past year will update every 73 days.
     """
 
-    # pick 15 oldest dates from past 3 years
+    # pick 5 oldest dates from past year
     date_sql = """
         SELECT * FROM doi_queue_paperbuzz_dates 
-        WHERE id > now() - interval '3 years' 
-        ORDER BY finished ASC NULLS FIRST LIMIT 15;
+        WHERE id > now() - interval '1 year' 
+        ORDER BY finished ASC NULLS FIRST LIMIT 5;
     """
     dates = db.session.execute(date_sql)
 
