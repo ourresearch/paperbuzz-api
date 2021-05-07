@@ -51,7 +51,10 @@ app = Flask(__name__)
 app.config[
     "SQLALCHEMY_TRACK_MODIFICATIONS"
 ] = True  # as instructed, to suppress warning
-app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
+db_uri = os.getenv("DATABASE_URL")
+if db_uri.startswith("postgres://"):
+    db_uri = db_uri.replace("postgres://", "postgresql://", 1)  # temp heroku sqlalchemy fix
+app.config["SQLALCHEMY_DATABASE_URI"] = db_uri
 app.config["SQLALCHEMY_ECHO"] = os.getenv("SQLALCHEMY_ECHO", False) == "True"
 
 # from http://stackoverflow.com/a/12417346/596939
