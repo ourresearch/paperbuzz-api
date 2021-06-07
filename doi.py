@@ -120,7 +120,7 @@ class OaDoi(object):
 
     def get(self):
         r = requests_retry_session(retries=2).get(
-            self.url + "?email=team@ourresearch.org", timeout=5
+            self.url + "?email=team@ourresearch.org", timeout=10
         )
         if r.status_code == 200:
             self.data = r.json()
@@ -145,7 +145,7 @@ class CrossrefMetadata(object):
         if cached_item and cached_item.updated > expired:
             self.data = cached_item.api_raw
         else:
-            r = requests.get(self.url, timeout=6)
+            r = requests.get(self.url, timeout=10)
             if r.status_code == 200:
                 self.data = r.json()
                 self.save_to_cache()
