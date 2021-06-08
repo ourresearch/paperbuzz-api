@@ -24,7 +24,7 @@ def update_fn(cls, method, obj_id_list, shortcut_data=None, index=1):
 
     # logger(u"obj_id_list: {}".format(obj_id_list))
 
-    q = db.session.query(cls).options(orm.undefer('*')).filter(cls.id.in_(obj_id_list))
+    q = db.session.query(cls).options(orm.undefer("*")).filter(cls.id.in_(obj_id_list))
     obj_rows = q.all()
     num_obj_rows = len(obj_rows)
 
@@ -40,17 +40,19 @@ def update_fn(cls, method, obj_id_list, shortcut_data=None, index=1):
         safe_commit(db)
         logger.info("done")
 
-    q = db.session.query(cls).options(orm.undefer('*')).filter(cls.id.in_(obj_id_list))
+    q = db.session.query(cls).options(orm.undefer("*")).filter(cls.id.in_(obj_id_list))
     obj_rows = q.all()
     num_obj_rows = len(obj_rows)
 
-    logger.info("{pid} {repr}.{method_name}() got {num_obj_rows} objects in {elapsed} seconds".format(
-        pid=os.getpid(),
-        repr=cls.__name__,
-        method_name=method.__name__,
-        num_obj_rows=num_obj_rows,
-        elapsed=elapsed(start)
-    ))
+    logger.info(
+        "{pid} {repr}.{method_name}() got {num_obj_rows} objects in {elapsed} seconds".format(
+            pid=os.getpid(),
+            repr=cls.__name__,
+            method_name=method.__name__,
+            num_obj_rows=num_obj_rows,
+            elapsed=elapsed(start),
+        )
+    )
 
     for count, obj in enumerate(obj_rows):
         start_time = time()
@@ -61,22 +63,24 @@ def update_fn(cls, method, obj_id_list, shortcut_data=None, index=1):
         method_to_run = getattr(obj, method.__name__)
 
         logger.info("***")
-        logger.info("#{count} starting {repr}.{method_name}() method".format(
-            count=count + (num_obj_rows*index),
-            repr=obj,
-            method_name=method.__name__
-        ))
+        logger.info(
+            "#{count} starting {repr}.{method_name}() method".format(
+                count=count + (num_obj_rows * index),
+                repr=obj,
+                method_name=method.__name__,
+            )
+        )
 
         if shortcut_data:
             method_to_run(shortcut_data)
         else:
             method_to_run()
 
-        logger.info("finished {repr}.{method_name}(). took {elapsed} seconds".format(
-            repr=obj,
-            method_name=method.__name__,
-            elapsed=elapsed(start_time, 4)
-        ))
+        logger.info(
+            "finished {repr}.{method_name}(). took {elapsed} seconds".format(
+                repr=obj, method_name=method.__name__, elapsed=elapsed(start_time, 4)
+            )
+        )
 
     logger.info("committing\n\n")
     start_time = time()
@@ -149,9 +153,7 @@ class UpdateDbQueue:
             WHERE picked_from_queue.id = doi_queue_rows_to_update.id
             RETURNING doi_queue_rows_to_update.id;"""
         text_query = text_query_pattern.format(
-            chunk=chunk,
-            my_dyno_name=my_dyno_name,
-            queue_table=queue_table
+            chunk=chunk, my_dyno_name=my_dyno_name, queue_table=queue_table
         )
         logger.info("the queue query is:\n{}".format(text_query))
 
@@ -164,7 +166,9 @@ class UpdateDbQueue:
                 object_ids = [single_obj_id]
             else:
                 # logger.info(u"looking for new jobs")
-                row_list = db.engine.execute(text(text_query).execution_options(autocommit=True)).fetchall()
+                row_list = db.engine.execute(
+                    text(text_query).execution_options(autocommit=True)
+                ).fetchall()
                 object_ids = [row[0] for row in row_list]
                 # logger.info(u"finished get-new-ids query in {} seconds".format(elapsed(new_loop_start_time)))
 
@@ -181,38 +185,49 @@ class UpdateDbQueue:
                 shortcut_data_start = time()
                 logger.info("Getting shortcut data...")
                 shortcut_data = self.shortcut_fn_per_chunk()
-                logger.info("Got shortcut data in {} seconds".format(
-                    elapsed(shortcut_data_start)))
+                logger.info(
+                    "Got shortcut data in {} seconds".format(
+                        elapsed(shortcut_data_start)
+                    )
+                )
 
             update_fn(*update_fn_args, index=index, shortcut_data=shortcut_data)
 
             object_ids_str = ",".join(["'{}'".format(id) for id in object_ids])
-            run_sql(db, "update {queue_table} set finished=now() where id in ({ids})".format(
-                queue_table=queue_table, ids=object_ids_str))
+            run_sql(
+                db,
+                "update {queue_table} set finished=now() where id in ({ids})".format(
+                    queue_table=queue_table, ids=object_ids_str
+                ),
+            )
 
             index += 1
 
             if single_obj_id:
                 return
             else:
-                num_items = limit  #let's say have to do the full limit
+                num_items = limit  # let's say have to do the full limit
                 num_jobs_remaining = num_items - (index * chunk)
                 try:
-                    jobs_per_hour_this_chunk = chunk / float(elapsed(new_loop_start_time) / 3600)
-                    predicted_mins_to_finish = round(
-                        (num_jobs_remaining / float(jobs_per_hour_this_chunk)) * 60,
-                        1
+                    jobs_per_hour_this_chunk = chunk / float(
+                        elapsed(new_loop_start_time) / 3600
                     )
-                    logger.info("\n\nWe're doing {} jobs per hour. At this rate, if we had to do everything up to limit, done in {}min".format(
-                        int(jobs_per_hour_this_chunk),
-                        predicted_mins_to_finish
-                    ))
-                    logger.info("\t{} seconds this loop, {} chunks in {} seconds, {} seconds/chunk average\n".format(
-                        elapsed(new_loop_start_time),
-                        index,
-                        elapsed(start_time),
-                        round(elapsed(start_time)/float(index), 1)
-                    ))
+                    predicted_mins_to_finish = round(
+                        (num_jobs_remaining / float(jobs_per_hour_this_chunk)) * 60, 1
+                    )
+                    logger.info(
+                        "\n\nWe're doing {} jobs per hour. At this rate, if we had to do everything up to limit, done in {}min".format(
+                            int(jobs_per_hour_this_chunk), predicted_mins_to_finish
+                        )
+                    )
+                    logger.info(
+                        "\t{} seconds this loop, {} chunks in {} seconds, {} seconds/chunk average\n".format(
+                            elapsed(new_loop_start_time),
+                            index,
+                            elapsed(start_time),
+                            round(elapsed(start_time) / float(index), 1),
+                        )
+                    )
                 except ZeroDivisionError:
                     # logger.info(u"not printing status because divide by zero")
                     logger.info("."),
@@ -235,16 +250,21 @@ if __name__ == "__main__":
 
     # get args from the command line:
     parser = argparse.ArgumentParser(description="Run stuff.")
-    parser.add_argument('function', type=str, help="what function you want to run")
-    parser.add_argument('optional_args', nargs='*', help="positional args for the function")
+    parser.add_argument("function", type=str, help="what function you want to run")
+    parser.add_argument(
+        "optional_args", nargs="*", help="positional args for the function"
+    )
 
     args = vars(parser.parse_args())
 
     function = args["function"]
     optional_args = args["optional_args"]
 
-    logger.info("running main.py {function} with these args:{optional_args}\n".format(
-        function=function, optional_args=optional_args))
+    logger.info(
+        "running main.py {function} with these args:{optional_args}\n".format(
+            function=function, optional_args=optional_args
+        )
+    )
 
     main(function, optional_args)
 

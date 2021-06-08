@@ -12,7 +12,7 @@ from app import HEROKU_APP_NAME, db, logger
 from jobs import update_registry
 from util import clean_doi, elapsed, get_sql_answer, get_sql_answers, run_sql
 
-sentry_sdk.init(os.environ.get('SENTRY_DSN'))
+sentry_sdk.init(os.environ.get("SENTRY_DSN"))
 
 
 def monitor_till_done(job_type):
@@ -24,7 +24,7 @@ def monitor_till_done(job_type):
     num_unfinished = number_unfinished(job_type)
     print("num_unfinished", num_unfinished)
 
-    loop_thresholds = {"short": 30, "long": 10*60, "medium": 60}
+    loop_thresholds = {"short": 30, "long": 10 * 60, "medium": 60}
     loop_unfinished = {"short": num_unfinished, "long": num_unfinished}
     loop_start_time = {"short": time(), "long": time()}
 
@@ -35,23 +35,38 @@ def monitor_till_done(job_type):
                     num_unfinished_now = number_unfinished(job_type)
                     num_finished_this_loop = loop_unfinished[loop] - num_unfinished_now
                     loop_unfinished[loop] = num_unfinished_now
-                    if loop=="long":
+                    if loop == "long":
                         logger.info("\n****"),
-                    logger.info("   {} finished in the last {} seconds, {} of {} are now finished ({}%).  ".format(
-                        num_finished_this_loop, loop_thresholds[loop],
-                        num_total - num_unfinished_now,
-                        num_total,
-                        int(100*float(num_total - num_unfinished_now)/num_total)
-                    )),  # comma so the next part will stay on the same line
+                    logger.info(
+                        "   {} finished in the last {} seconds, {} of {} are now finished ({}%).  ".format(
+                            num_finished_this_loop,
+                            loop_thresholds[loop],
+                            num_total - num_unfinished_now,
+                            num_total,
+                            int(
+                                100 * float(num_total - num_unfinished_now) / num_total
+                            ),
+                        )
+                    ),  # comma so the next part will stay on the same line
                     if num_finished_this_loop:
-                        minutes_left = float(num_unfinished_now) / num_finished_this_loop * loop_thresholds[loop] / 60
-                        logger.info("{} estimate: done in {} mins, which is {} hours".format(
-                            loop, round(minutes_left, 1), round(minutes_left/60, 1)))
+                        minutes_left = (
+                            float(num_unfinished_now)
+                            / num_finished_this_loop
+                            * loop_thresholds[loop]
+                            / 60
+                        )
+                        logger.info(
+                            "{} estimate: done in {} mins, which is {} hours".format(
+                                loop,
+                                round(minutes_left, 1),
+                                round(minutes_left / 60, 1),
+                            )
+                        )
                     else:
                         print()
                     loop_start_time[loop] = time()
                     # print_idle_dynos(job_type)
-        print(".", end=' ')
+        print(".", end=" ")
         sleep(3)
     logger.info("everything is done.  turning off all the dynos")
     scale_dyno(0, job_type)
@@ -63,12 +78,17 @@ def number_total_on_queue(job_type):
 
 
 def number_waiting_on_queue(job_type):
-    num = get_sql_answer(db, "select count(*) from {} where started is null".format(table_name(job_type)))
+    num = get_sql_answer(
+        db, "select count(*) from {} where started is null".format(table_name(job_type))
+    )
     return num
 
 
 def number_unfinished(job_type):
-    num = get_sql_answer(db, "select count(*) from {} where finished is null".format(table_name(job_type)))
+    num = get_sql_answer(
+        db,
+        "select count(*) from {} where finished is null".format(table_name(job_type)),
+    )
     return num
 
 
@@ -76,15 +96,19 @@ def print_status(job_type):
     num_dois = number_total_on_queue(job_type)
     num_waiting = number_waiting_on_queue(job_type)
     if num_dois:
-        logger.info("There are {} dois in the queue, of which {} ({}%) are waiting to run".format(
-            num_dois, num_waiting, int(100*float(num_waiting)/num_dois)))
+        logger.info(
+            "There are {} dois in the queue, of which {} ({}%) are waiting to run".format(
+                num_dois, num_waiting, int(100 * float(num_waiting) / num_dois)
+            )
+        )
 
 
 def kick(job_type):
     q = """update {table_name} set started=null, finished=null
           where finished is null
           and id in (select id from {table_name} where started is not null)""".format(
-          table_name=table_name(job_type))
+        table_name=table_name(job_type)
+    )
     run_sql(db, q)
     print_status(job_type)
 
@@ -101,18 +125,18 @@ def truncate(job_type):
 
 def table_name(job_type):
     table_name = "doi_queue_paperbuzz"
-    if job_type=="hybrid":
+    if job_type == "hybrid":
         table_name += "_with_hybrid"
-    elif job_type=="dates":
+    elif job_type == "dates":
         table_name += "_dates"
     return table_name
 
 
 def process_name(job_type):
-    process_name = "run" # formation name is from Procfile
-    if job_type=="hybrid":
+    process_name = "run"  # formation name is from Procfile
+    if job_type == "hybrid":
         process_name += "_with_hybrid"
-    elif job_type=="dates":
+    elif job_type == "dates":
         process_name += "_dates"
     return process_name
 
@@ -133,14 +157,25 @@ def print_idle_dynos(job_type):
     app = heroku_conn.apps()[HEROKU_APP_NAME]
     running_dynos = []
     try:
-        running_dynos = [dyno for dyno in app.dynos() if dyno.name.startswith(process_name(job_type))]
+        running_dynos = [
+            dyno for dyno in app.dynos() if dyno.name.startswith(process_name(job_type))
+        ]
     except (KeyError, TypeError) as e:
         pass
 
-    dynos_still_working = get_sql_answers(db, "select dyno from {} where started is not null and finished is null".format(table_name(job_type)))
+    dynos_still_working = get_sql_answers(
+        db,
+        "select dyno from {} where started is not null and finished is null".format(
+            table_name(job_type)
+        ),
+    )
     dynos_still_working_names = [n for n in dynos_still_working]
 
-    logger.info("dynos still running: {}".format([d.name for d in running_dynos if d.name in dynos_still_working_names]))
+    logger.info(
+        "dynos still running: {}".format(
+            [d.name for d in running_dynos if d.name in dynos_still_working_names]
+        )
+    )
     # logger.info(u"dynos stopped:", [d.name for d in running_dynos if d.name not in dynos_still_working_names])
     # kill_list = [d.kill() for d in running_dynos if d.name not in dynos_still_working_names]
 
@@ -166,13 +201,16 @@ def add_dois_to_queue_from_file(filename, job_type):
     start = time()
 
     command = """psql `heroku config:get DATABASE_URL`?ssl=true -c "\copy {table_name} (id) FROM '{filename}' WITH CSV DELIMITER E'|';" """.format(
-        table_name=table_name(job_type), filename=filename)
+        table_name=table_name(job_type), filename=filename
+    )
     call(command, shell=True)
 
     q = "update {} set id=lower(id)".format(table_name(job_type))
     run_sql(db, q)
 
-    logger.info("add_dois_to_queue_from_file done in {} seconds".format(elapsed(start, 1)))
+    logger.info(
+        "add_dois_to_queue_from_file done in {} seconds".format(elapsed(start, 1))
+    )
     print_status(job_type)
 
 
@@ -184,10 +222,13 @@ def add_dois_to_queue_from_query(where, job_type):
     # create_table_command = "CREATE TABLE {} as (select id, random() as rand, false as enqueued, null::timestamp as finished, null::timestamp as started, null::text as dyno from crossref)".format(
     #     table_name(job_type))
     create_table_command = "CREATE TABLE {} as (select doi as id, random() as rand, false as enqueued, null::timestamp as finished, null::timestamp as started, null::text as dyno from dois_wos_stefi)".format(
-        table_name(job_type))
+        table_name(job_type)
+    )
 
     if where:
-        create_table_command = create_table_command.replace("from crossref)", "from crossref where {})".format(where))
+        create_table_command = create_table_command.replace(
+            "from crossref)", "from crossref where {})".format(where)
+        )
     run_sql(db, create_table_command)
     recreate_commands = """
         alter table {table_name} alter column rand set default random();
@@ -201,7 +242,8 @@ def add_dois_to_queue_from_query(where, job_type):
         ALTER TABLE {table_name} SET (autovacuum_analyze_scale_factor = 0.0);
         ALTER TABLE {table_name} SET (autovacuum_analyze_threshold = 10000000);
         """.format(
-        table_name=table_name(job_type))
+        table_name=table_name(job_type)
+    )
     for command in recreate_commands.split(";"):
         run_sql(db, command)
 
@@ -227,19 +269,22 @@ def add_dois_to_queue_from_query(where, job_type):
         response_jsonb->>'_closed_base_ids' AS closed_base_ids,
         response_jsonb->>'license' AS license
        FROM crossref where id in (select id from {table_name})""".format(
-        table_name=table_name(job_type))
+        table_name=table_name(job_type)
+    )
 
     run_sql(db, command)
 
     # they are already lowercased
-    logger.info("add_dois_to_queue_from_query done in {} seconds".format(elapsed(start, 1)))
+    logger.info(
+        "add_dois_to_queue_from_query done in {} seconds".format(elapsed(start, 1))
+    )
     print_status(job_type)
 
 
 def run(parsed_args, job_type):
     start = time()
     if job_type in ("normal", "hybrid"):
-        update = update_registry.get("WeeklyStats."+process_name(job_type))
+        update = update_registry.get("WeeklyStats." + process_name(job_type))
         if parsed_args.doi:
             parsed_args.id = clean_doi(parsed_args.doi)
             parsed_args.doi = None
@@ -252,36 +297,93 @@ def run(parsed_args, job_type):
 
     if job_type in ("normal", "hybrid"):
         from event import CedEvent
+
         my_event = CedEvent.query.get(parsed_args.id)
         pprint(my_event)
+
 
 # python doi_queue.py --hybrid --filename=data/dois_juan_accuracy.csv --dynos=40 --soup
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run stuff.")
-    parser.add_argument('--id', nargs="?", type=str, help="id of the one thing you want to update (case sensitive)")
-    parser.add_argument('--doi', nargs="?", type=str, help="id of the one thing you want to update (case insensitive)")
+    parser.add_argument(
+        "--id",
+        nargs="?",
+        type=str,
+        help="id of the one thing you want to update (case sensitive)",
+    )
+    parser.add_argument(
+        "--doi",
+        nargs="?",
+        type=str,
+        help="id of the one thing you want to update (case insensitive)",
+    )
 
-    parser.add_argument('--filename', nargs="?", type=str, help="filename with dois, one per line")
-    parser.add_argument('--addall', default=False, action='store_true', help="add everything")
-    parser.add_argument('--where', nargs="?", type=str, default=None, help="""where string for addall (eg --where="response_jsonb->>'oa_status'='green'")""")
+    parser.add_argument(
+        "--filename", nargs="?", type=str, help="filename with dois, one per line"
+    )
+    parser.add_argument(
+        "--addall", default=False, action="store_true", help="add everything"
+    )
+    parser.add_argument(
+        "--where",
+        nargs="?",
+        type=str,
+        default=None,
+        help="""where string for addall (eg --where="response_jsonb->>'oa_status'='green'")""",
+    )
 
-    parser.add_argument('--hybrid', default=False, action='store_true', help="if hybrid, else don't include")
-    parser.add_argument('--dates', default=False, action='store_true', help="use date queue")
-    parser.add_argument('--all', default=False, action='store_true', help="do everything")
+    parser.add_argument(
+        "--hybrid",
+        default=False,
+        action="store_true",
+        help="if hybrid, else don't include",
+    )
+    parser.add_argument(
+        "--dates", default=False, action="store_true", help="use date queue"
+    )
+    parser.add_argument(
+        "--all", default=False, action="store_true", help="do everything"
+    )
 
-    parser.add_argument('--view', nargs="?", type=str, default=None, help="view name to export from")
+    parser.add_argument(
+        "--view", nargs="?", type=str, default=None, help="view name to export from"
+    )
 
-    parser.add_argument('--reset', default=False, action='store_true', help="do you want to just reset?")
-    parser.add_argument('--run', default=False, action='store_true', help="to run the queue")
-    parser.add_argument('--status', default=False, action='store_true', help="to logger.info(the status")
-    parser.add_argument('--dynos', default=None, type=int, help="scale to this many dynos")
-    parser.add_argument('--export', default=False, action='store_true', help="export the results")
-    parser.add_argument('--logs', default=False, action='store_true', help="logger.info(out logs")
-    parser.add_argument('--monitor', default=False, action='store_true', help="monitor till done, then turn off dynos")
-    parser.add_argument('--soup', default=False, action='store_true', help="soup to nuts")
-    parser.add_argument('--kick', default=False, action='store_true', help="put started but unfinished dois back to unstarted so they are retried")
+    parser.add_argument(
+        "--reset", default=False, action="store_true", help="do you want to just reset?"
+    )
+    parser.add_argument(
+        "--run", default=False, action="store_true", help="to run the queue"
+    )
+    parser.add_argument(
+        "--status", default=False, action="store_true", help="to logger.info(the status"
+    )
+    parser.add_argument(
+        "--dynos", default=None, type=int, help="scale to this many dynos"
+    )
+    parser.add_argument(
+        "--export", default=False, action="store_true", help="export the results"
+    )
+    parser.add_argument(
+        "--logs", default=False, action="store_true", help="logger.info(out logs"
+    )
+    parser.add_argument(
+        "--monitor",
+        default=False,
+        action="store_true",
+        help="monitor till done, then turn off dynos",
+    )
+    parser.add_argument(
+        "--soup", default=False, action="store_true", help="soup to nuts"
+    )
+    parser.add_argument(
+        "--kick",
+        default=False,
+        action="store_true",
+        help="put started but unfinished dois back to unstarted so they are retried",
+    )
 
     parsed_args = parser.parse_args()
     job_type = "normal"

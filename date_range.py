@@ -36,7 +36,7 @@ class DateRange(db.Model):
         return self.first + datetime.timedelta(days=1)
 
     def get_events(self, rows=1000):
-        headers={"Accept": "application/json", "User-Agent": "ourresearch.org"}
+        headers = {"Accept": "application/json", "User-Agent": "ourresearch.org"}
         base_url = "https://api.eventdata.crossref.org/v1/events?rows={rows}&filter=from-collected-date:{first},until-collected-date:{first}&mailto=team@ourresearch.org"
 
         cursor = None
@@ -46,10 +46,7 @@ class DateRange(db.Model):
 
         while has_more_responses:
             start_time = time()
-            url = base_url.format(
-                    first=self.first_day,
-                    last=self.last_day,
-                    rows=rows)
+            url = base_url.format(first=self.first_day, last=self.last_day, rows=rows)
             if cursor:
                 url += "&cursor={cursor}".format(cursor=cursor)
             logger.info("calling url: {}".format(url))
@@ -60,17 +57,26 @@ class DateRange(db.Model):
                 try:
                     s = requests.Session()
                     resp = s.get(url, headers=headers, timeout=60)
-                except (requests.exceptions.ReadTimeout, requests.exceptions.ConnectionError):
-                    logger.info("timed out or connection error, trying again after sleeping")
+                except (
+                    requests.exceptions.ReadTimeout,
+                    requests.exceptions.ConnectionError,
+                ):
+                    logger.info(
+                        "timed out or connection error, trying again after sleeping"
+                    )
                     call_tries += 1
                     sleep(2)
 
             if not resp:
                 self.process_failed_import()
 
-            logger.info("getting CED data took {} seconds".format(elapsed(start_time, 2)))
+            logger.info(
+                "getting CED data took {} seconds".format(elapsed(start_time, 2))
+            )
             if resp.status_code != 200:
-                logger.info("error in CED call, status_code = {}".format(resp.status_code))
+                logger.info(
+                    "error in CED call, status_code = {}".format(resp.status_code)
+                )
                 return
 
             resp_data = resp.json()["message"]
@@ -103,13 +109,24 @@ class DateRange(db.Model):
                     logger.info("missing key for event, skipping. {}".format(api_raw))
                     continue
 
-                bad_dates = ["0000-01-01T00:00:00Z", "-0001-11-30T00:00:00Z", "-0001-11-28T00:00:00Z"]
+                bad_dates = [
+                    "0000-01-01T00:00:00Z",
+                    "-0001-11-30T00:00:00Z",
+                    "-0001-11-28T00:00:00Z",
+                ]
                 if api_raw["occurred_at"] in bad_dates:
-                    logger.info("bad date format in occurred_at field, skipping. {}".format(api_raw))
+                    logger.info(
+                        "bad date format in occurred_at field, skipping. {}".format(
+                            api_raw
+                        )
+                    )
                     continue
 
-                if not CedEvent.query.filter(CedEvent.uniqueness_key==ced_obj.uniqueness_key).first() and \
-                            ced_obj.uniqueness_key not in [obj.uniqueness_key for obj in to_commit]:
+                if not CedEvent.query.filter(
+                    CedEvent.uniqueness_key == ced_obj.uniqueness_key
+                ).first() and ced_obj.uniqueness_key not in [
+                    obj.uniqueness_key for obj in to_commit
+                ]:
                     try:
                         db.session.merge(ced_obj)
                         to_commit.append(ced_obj)
@@ -125,10 +142,14 @@ class DateRange(db.Model):
                     # logger.info(u"committing")
                     start_commit = time()
                     safe_commit(db)
-                    logger.info("committing done in {} seconds".format(elapsed(start_commit, 2)))
+                    logger.info(
+                        "committing done in {} seconds".format(elapsed(start_commit, 2))
+                    )
                     to_commit = []
 
-            logger.info("at bottom of loop, got {} records".format(len(resp_data["events"])))
+            logger.info(
+                "at bottom of loop, got {} records".format(len(resp_data["events"]))
+            )
 
         # make sure to get the last ones
         logger.info("done everything, saving last ones")
@@ -137,9 +158,14 @@ class DateRange(db.Model):
         return num_so_far
 
     def process_failed_import(self):
-        run_sql(db, """update doi_queue_paperbuzz_dates 
+        run_sql(
+            db,
+            """update doi_queue_paperbuzz_dates 
                                        set enqueued=NULL, finished=NULL, started=NULL, dyno=NULL 
-                                       where id = '{id_date}'""".format(id_date=self.id))
+                                       where id = '{id_date}'""".format(
+                id_date=self.id
+            ),
+        )
         raise requests.exceptions.ReadTimeout
 
     def __repr__(self):

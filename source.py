@@ -11,7 +11,6 @@ def make_event_source(id):
 
 
 class EventSource(object):
-
     def __init__(self, source):
         self.id = source.id
         self.source = source
@@ -37,7 +36,6 @@ class EventSource(object):
         self.events_count_by_month = count_by(occurred_ats, "month")
         self.events_count_by_day = count_by(occurred_ats, "day")
 
-
     def to_dict(self):
         ret = {
             "source_id": self.source.id,
@@ -47,7 +45,7 @@ class EventSource(object):
             "first_event_date": self.first_event_date,
             "events_count_by_year": self.events_count_by_year,
             "events_count_by_month": self.events_count_by_month,
-            "events_count_by_day": self.events_count_by_day
+            "events_count_by_day": self.events_count_by_day,
         }
 
         return ret
@@ -68,7 +66,9 @@ class WikipediaEventSource(EventSource):
         return None
 
     def add_event(self, ced_event):
-        event_for_this_wiki_page = self._get_base_wiki_page_for_url(ced_event["subj_id"])
+        event_for_this_wiki_page = self._get_base_wiki_page_for_url(
+            ced_event["subj_id"]
+        )
 
         # first we see if this wiki page already has an Event
         try:
@@ -103,10 +103,7 @@ def count_by(timestamps, granularity="day"):
 
     ret = []
     for ts, count in hist_dict.items():
-        ret.append({
-            "date": ts,
-            "count": count
-        })
+        ret.append({"date": ts, "count": count})
 
     ret = sorted(ret, key=lambda x: x["date"])
 

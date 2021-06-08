@@ -39,10 +39,7 @@ for a_library in libraries_to_mum:
 requests.packages.urllib3.disable_warnings()
 
 # error reporting with sentry
-sentry_sdk.init(
-    dsn=os.environ.get('SENTRY_DSN'),
-    integrations=[FlaskIntegration()]
-)
+sentry_sdk.init(dsn=os.environ.get("SENTRY_DSN"), integrations=[FlaskIntegration()])
 
 app = Flask(__name__)
 
@@ -53,9 +50,12 @@ app.config[
 ] = True  # as instructed, to suppress warning
 db_uri = os.getenv("DATABASE_URL")
 if db_uri.startswith("postgres://"):
-    db_uri = db_uri.replace("postgres://", "postgresql://", 1)  # temp heroku sqlalchemy fix
+    db_uri = db_uri.replace(
+        "postgres://", "postgresql://", 1
+    )  # temp heroku sqlalchemy fix
 app.config["SQLALCHEMY_DATABASE_URI"] = db_uri
 app.config["SQLALCHEMY_ECHO"] = os.getenv("SQLALCHEMY_ECHO", False) == "True"
+
 
 # from http://stackoverflow.com/a/12417346/596939
 class NullPoolSQLAlchemy(SQLAlchemy):

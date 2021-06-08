@@ -20,12 +20,17 @@ def old_dates_update():
     # set values to null so they are picked up by importer
     for date in dates:
         id_date = date[0]
-        run_sql(db, """update doi_queue_paperbuzz_dates 
+        run_sql(
+            db,
+            """update doi_queue_paperbuzz_dates 
                        set enqueued=NULL, finished=NULL, started=NULL, dyno=NULL 
-                       where id = '{id_date}'""".format(id_date=id_date))
+                       where id = '{id_date}'""".format(
+                id_date=id_date
+            ),
+        )
 
     # run update script
-    os.system('python doi_queue.py --dates --run')
+    os.system("python doi_queue.py --dates --run")
 
 
 if __name__ == "__main__":

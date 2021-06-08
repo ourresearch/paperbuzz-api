@@ -277,9 +277,11 @@ def trending():
         .limit(10)
         .all()
     )
-    root_url = 'https://paperbuzz.org/details/{}'
+    root_url = "https://paperbuzz.org/details/{}"
 
-    results = [{'url': root_url.format(event.doi), 'count': event.total} for event in events]
+    results = [
+        {"url": root_url.format(event.doi), "count": event.total} for event in events
+    ]
     return jsonify(results)
 
 
