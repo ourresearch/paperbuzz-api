@@ -6,12 +6,12 @@ Flask-SQLAlchemy==2.5.1
 gevent==21.8.0
 gunicorn==20.1.0
 heroku3==4.2.3
-mendeley==0.3.2
+# mendeley==0.3.2 # disable due to requests dependency issue
 nose==1.3.7
 psycopg2==2.9.1
 psycogreen==1.0.2
 pytest==6.2.4
-requests[security] ==2.26.0
+requests ==2.26.0
 requests-cache==0.7.4
 sentry-sdk[flask]==1.3.1
 shortuuid==1.0.1
