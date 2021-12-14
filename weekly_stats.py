@@ -234,7 +234,7 @@ class WeeklyStats(db.Model):
     def run_other_things(self):
         self.updated = datetime.datetime.utcnow()
 
-        url = "http://api.oadoi.org/v2/{}?email=team@ourresearch.org".format(self.id)
+        url = "http://api.oadoi.org/v2/{}?email=team+paperbuzz@ourresearch.org".format(self.id)
         r = requests.get(url)
         self.oadoi_api_raw = r.json()
         if self.oadoi_api_raw and "is_oa" in self.oadoi_api_raw:
