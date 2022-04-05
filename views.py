@@ -175,74 +175,74 @@ papers_by_discipline = {
 
 
 # of form /2017/week-32
-@app.route("/v0/hot/2017/<week_string>", methods=["GET"])
-def get_hot_week_endpoint(week_string):
-    week_num = week_string.split("-")[1]
-    response_dict = {}
-
-    random.seed(42)
-    for facet_open in [True, None]:
-        if facet_open:
-            oa_where = "and is_open_access=true"
-        else:
-            oa_where = ""
-        for facet_audience in ["public", None]:
-            if facet_audience == "public":
-                academic_where = "and ratio_academic_unpaywall_events <= 0.10"
-            else:
-                academic_where = ""
-            query_template = """
-                    SELECT id
-                    FROM (SELECT id,
-                          rank() over (partition by main_discipline order by coalesce(num_twitter_events, 0)+coalesce(num_unpaywall_events, 0) desc nulls last) as rank
-                       FROM weekly_stats
-                       where num_unpaywall_events > 5
-                       {oa_where}
-                       {academic_where}
-                    ) t WHERE rank <= 3"""
-            query = query_template.format(
-                oa_where=oa_where, academic_where=academic_where
-            )
-            doi_list = get_sql_answers(db, query)
-            papers = (
-                db.session.query(WeeklyStats).filter(WeeklyStats.id.in_(doi_list)).all()
-            )
-
-            for paper in papers:
-                if not paper.main_discipline or paper.main_discipline == "unspecified":
-                    continue
-
-                paper_dict = paper.to_dict_hotness()
-                paper_dict["sort_score"] = (
-                    paper.num_twitter_events + paper.num_unpaywall_events
-                )
-
-                # only save filters if they are restrictive
-                paper_dict["filters"] = {}
-                paper_dict["filters"]["topic"] = paper.main_discipline
-                if facet_open:
-                    paper_dict["filters"]["open"] = paper.is_open_access
-                if facet_audience:
-                    paper_dict["filters"]["audience"] = facet_audience
-                    if paper.ratio_academic_unpaywall_events:
-                        paper_dict["filters"]["public_percent"] = round(
-                            100 * (1 - paper.ratio_academic_unpaywall_events), 0
-                        )
-                    else:
-                        paper_dict["filters"]["public_percent"] = 100
-
-                # dedup the papers, saving the most restrictive
-                if paper.id in response_dict:
-                    if len(list(paper_dict["filters"].keys())) > (
-                        list(response_dict[paper.id]["filters"].keys())
-                    ):
-                        response_dict[paper.id] = paper_dict
-                else:
-                    response_dict[paper.id] = paper_dict
-        response = list(response_dict.values())
-        response = sorted(response, key=lambda k: k["sort_score"], reverse=True)
-
-    return jsonify({"list": response})
+# @app.route("/v0/hot/2017/<week_string>", methods=["GET"])
+# def get_hot_week_endpoint(week_string):
+#     week_num = week_string.split("-")[1]
+#     response_dict = {}
+#
+#     random.seed(42)
+#     for facet_open in [True, None]:
+#         if facet_open:
+#             oa_where = "and is_open_access=true"
+#         else:
+#             oa_where = ""
+#         for facet_audience in ["public", None]:
+#             if facet_audience == "public":
+#                 academic_where = "and ratio_academic_unpaywall_events <= 0.10"
+#             else:
+#                 academic_where = ""
+#             query_template = """
+#                     SELECT id
+#                     FROM (SELECT id,
+#                           rank() over (partition by main_discipline order by coalesce(num_twitter_events, 0)+coalesce(num_unpaywall_events, 0) desc nulls last) as rank
+#                        FROM weekly_stats
+#                        where num_unpaywall_events > 5
+#                        {oa_where}
+#                        {academic_where}
+#                     ) t WHERE rank <= 3"""
+#             query = query_template.format(
+#                 oa_where=oa_where, academic_where=academic_where
+#             )
+#             doi_list = get_sql_answers(db, query)
+#             papers = (
+#                 db.session.query(WeeklyStats).filter(WeeklyStats.id.in_(doi_list)).all()
+#             )
+#
+#             for paper in papers:
+#                 if not paper.main_discipline or paper.main_discipline == "unspecified":
+#                     continue
+#
+#                 paper_dict = paper.to_dict_hotness()
+#                 paper_dict["sort_score"] = (
+#                     paper.num_twitter_events + paper.num_unpaywall_events
+#                 )
+#
+#                 # only save filters if they are restrictive
+#                 paper_dict["filters"] = {}
+#                 paper_dict["filters"]["topic"] = paper.main_discipline
+#                 if facet_open:
+#                     paper_dict["filters"]["open"] = paper.is_open_access
+#                 if facet_audience:
+#                     paper_dict["filters"]["audience"] = facet_audience
+#                     if paper.ratio_academic_unpaywall_events:
+#                         paper_dict["filters"]["public_percent"] = round(
+#                             100 * (1 - paper.ratio_academic_unpaywall_events), 0
+#                         )
+#                     else:
+#                         paper_dict["filters"]["public_percent"] = 100
+#
+#                 # dedup the papers, saving the most restrictive
+#                 if paper.id in response_dict:
+#                     if len(list(paper_dict["filters"].keys())) > (
+#                         list(response_dict[paper.id]["filters"].keys())
+#                     ):
+#                         response_dict[paper.id] = paper_dict
+#                 else:
+#                     response_dict[paper.id] = paper_dict
+#         response = list(response_dict.values())
+#         response = sorted(response, key=lambda k: k["sort_score"], reverse=True)
+#
+#     return jsonify({"list": response})
 
 
 @app.route("/v0/doi/<path:doi>", methods=["GET"])
